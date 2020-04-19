@@ -2,14 +2,14 @@
 
 {
     let view = {
-        el: '.canvas-wrapper',
-        template: `
-            <canvas id="canvas"></canvas>
-        `,
+        el: '#canvas',
+        template: ``,
         render(data){
-            let html = this.template
             document.querySelector(this.el).insertAdjacentHTML('afterbegin',this.template)
-        }
+        },
+        getThisElement() {
+          return document.querySelector(this.el)
+        },
     }
     let model = {
         data: {
@@ -19,8 +19,16 @@
             },
             using: false
         },
+        convertPosition(canvasRect, position) {
+            return {
+                x: position.x - canvasRect.x,
+                y: position.y - canvasRect.y
+            }
+        },
+        setPosition(position) {
+            this.data.position = position
+        },
         init() {
-
         }
     }
     let controller = {
@@ -28,51 +36,44 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.canvas = this.initCanvas()
+            this.canvas = this.initCanvas(this.view.getThisElement())
             this.addListener()
         },
         addListener() {
             document.querySelector('#canvas').onmousedown = e => {
                 this.model.data.using = true
-                this.setPosition({x: e.clientX, y: e.clientY})
+                let position = this.model.convertPosition(this.view.getThisElement().getClientRects()[0],{x: e.clientX, y: e.clientY})
+                this.model.setPosition(position)
             }
             document.querySelector('#canvas').onmousemove = e => {
-                const newPosition = {
+                let newPosition = {
                     x: e.clientX,
                     y: e.clientY
                 }
+                newPosition = this.model.convertPosition(this.view.getThisElement().getClientRects()[0], newPosition)
                 if (this.model.data.using){
-                    this.drawLine(this.canvas, this.model.data.position, this.setPosition(newPosition))
-                    this.setPosition(newPosition)
+                    this.drawLine(this.model.data.position, newPosition)
+                    this.model.setPosition(newPosition)
                 }
             }
             document.querySelector('#canvas').onmouseup = e => {
                 this.model.data.using = false
             }
         },
-        initCanvas() {
-            const canvas = document.getElementById('canvas')
-            const ctx = canvas.getContext('2d')
-            canvas.width = '1080'
-            canvas.height = '1440'
-            canvas.style.backgroundImage = `url("./1.JPG")`
-            return ctx
+        initCanvas(element) {
+            element.width = '1080'
+            element.height = '1440'
+            element.style.backgroundImage = `url("./1.JPG")`
+            return element.getContext('2d')
         },
-        drawLine(ctx,start,end){
-            ctx.beginPath()
-            ctx.strokeStyle  = 'red'
-            ctx.moveTo(start.x,start.y)
-            ctx.lineTo(end.x,end.y)
-            ctx.lineWidth = 3
-            ctx.stroke()
-            ctx.closePath()
-        },
-        setPosition(position){
-            let canvasRect = document.querySelector('#canvas').getClientRects()[0]
-            return this.model.data.position = {
-                x: position.x - canvasRect.x,
-                y: position.y - canvasRect.y
-            }
+        drawLine(start,end){
+            this.canvas.beginPath()
+            this.canvas.strokeStyle  = 'red'
+            this.canvas.moveTo(start.x,start.y)
+            this.canvas.lineTo(end.x,end.y)
+            this.canvas.lineWidth = 3
+            this.canvas.stroke()
+            this.canvas.closePath()
         }
     }
     controller.init(view,model)
