@@ -1,11 +1,9 @@
-
-
 {
     let view = {
         el: '#canvas',
-        template: ``,
+        template: `<button id="recordButton">开始录制</button>`,
         render(data){
-            document.querySelector(this.el).insertAdjacentHTML('afterbegin',this.template)
+            document.querySelector(this.el).insertAdjacentHTML('beforebegin',this.template)
         },
         getThisElement() {
           return document.querySelector(this.el)
@@ -17,7 +15,13 @@
                 x: undefined,
                 y: undefined
             },
-            using: false
+            using: false,
+            recordState: false,
+            recordData: {
+                duration: null,
+                track: [],
+            },
+            recordStartTime: '',
         },
         convertPosition(canvasRect, position) {
             return {
@@ -27,10 +31,14 @@
         },
         setPosition(position) {
             this.data.position = position
-            console.log(this.data.position)
         },
-        init() {
+        getPosition() {
+            return this.data.position
+        },
+        switchRecordState() {
+            this.data.recordState = ! this.data.recordState
         }
+        // init() {}
     }
     let controller = {
         init(view, model) {
@@ -47,18 +55,34 @@
                 this.model.setPosition(position)
             }
             document.querySelector('#canvas').onmousemove = e => {
-                let newPosition = {
-                    x: e.clientX,
-                    y: e.clientY
-                }
-                newPosition = this.model.convertPosition(this.view.getThisElement().getClientRects()[0], newPosition)
                 if (this.model.data.using){
+                    let newPosition = {
+                        x: e.clientX,
+                        y: e.clientY
+                    }
+                    newPosition = this.model.convertPosition(this.view.getThisElement().getClientRects()[0], newPosition)
                     this.drawLine(this.model.data.position, newPosition)
                     this.model.setPosition(newPosition)
+                    if (this.model.data.recordState) {
+                        const trackData = {
+                            time: new Date().getTime() - this.model.data.recordStartTime,
+                            position: JSON.parse(JSON.stringify(this.model.getPosition()))
+                        }
+                        this.model.data.recordData.track.push(trackData)
+                    }
                 }
             }
             document.querySelector('#canvas').onmouseup = e => {
                 this.model.data.using = false
+            }
+            document.querySelector('#recordButton').onclick = e =>{
+                this.model.switchRecordState()
+                if (this.model.data.recordState){
+                    this.model.data.recordStartTime = new Date().getTime()
+                }else {
+                    this.model.data.recordData.duration = new Date().getTime() - this.model.data.recordStartTime
+                    console.log(this.model.data.recordData)
+                }
             }
         },
         initCanvas(element) {
