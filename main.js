@@ -27,6 +27,7 @@
         },
         setPosition(position) {
             this.data.position = position
+            console.log(this.data.position)
         },
         init() {
         }
@@ -61,9 +62,10 @@
             }
         },
         initCanvas(element) {
-            element.width = '1080'
-            element.height = '1440'
+            element.width = '540'
+            element.height = '770'
             element.style.backgroundImage = `url("./1.JPG")`
+            element.style.backgroundSize = 'contain'
             return element.getContext('2d')
         },
         drawLine(start,end){
