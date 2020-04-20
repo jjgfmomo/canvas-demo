@@ -53,11 +53,51 @@
             this.addListener()
         },
         addListener() {
+            this.listenCanvasOnmousedown()
+            this.listenCanvasOnmousemove()
+            this.listenCanvasOnmouseup()
+            this.listenRecordButtonOnclick()
+            this.listenClearButtonOnclick()
+            this.listenPlayButtonOnclick()
+        },
+        listenRecordButtonOnclick() {
+            document.querySelector('#recordButton').onclick = e => {
+                this.model.switchRecordState()
+                if (this.model.data.recordState){
+                    this.model.data.recordStartTime = new Date().getTime()
+                }else {
+                    console.log(this.model.data.recordData)
+                }
+            }
+        },
+        listenClearButtonOnclick() {
+            document.querySelector('#clearButton').onclick = e => {
+                this.canvas.clearRect(0, 0, this.view.getThisElement().getClientRects()[0].width, this.view.getThisElement().getClientRects()[0].height)
+            }
+        },
+        listenPlayButtonOnclick() {
+            document.querySelector('#playButton').onclick = e => {
+                document.querySelector('#clearButton').click()
+                this.model.data.recordData.track.forEach(stroke => {
+                    let previousPositon = stroke[0].position
+                    stroke.forEach( track => {
+                        setTimeout(()=>{
+                            this.drawLine(previousPositon, track.position)
+                            previousPositon = track.position
+                        }, track.time)
+                    })
+                })
+            }
+
+        },
+        listenCanvasOnmousedown() {
             document.querySelector('#canvas').onmousedown = e => {
                 this.model.data.using = true
                 let position = this.model.convertPosition(this.view.getThisElement().getClientRects()[0],{x: e.clientX, y: e.clientY})
                 this.model.setPosition(position)
             }
+        },
+        listenCanvasOnmousemove() {
             document.querySelector('#canvas').onmousemove = e => {
                 if (this.model.data.using){
                     let newPosition = {
@@ -76,42 +116,13 @@
                     }
                 }
             }
+        },
+        listenCanvasOnmouseup() {
             document.querySelector('#canvas').onmouseup = e => {
                 this.model.data.using = false
                 this.model.data.recordData.track.push(this.model.data.stroke)
                 this.model.data.stroke = []
             }
-            document.querySelector('#recordButton').onclick = e => {
-                this.model.switchRecordState()
-                if (this.model.data.recordState){
-                    this.model.data.recordStartTime = new Date().getTime()
-                }else {
-                    console.log(this.model.data.recordData)
-                }
-            }
-            document.querySelector('#clearButton').onclick = e => {
-                this.canvas.clearRect(0, 0, this.view.getThisElement().getClientRects()[0].width, this.view.getThisElement().getClientRects()[0].height)
-            }
-            document.querySelector('#playButton').onclick = e => {
-                document.querySelector('#clearButton').click()
-                // let previousPositon = this.model.data.recordData.track[0].position
-                // this.model.data.recordData.track.forEach(track => {
-                //     setTimeout(()=>{
-                //         this.drawLine(previousPositon, track.position)
-                //         previousPositon = track.position
-                //     }, track.time)
-                // })
-                this.model.data.recordData.track.forEach(stroke => {
-                    let previousPositon = stroke[0].position
-                    stroke.forEach( track => {
-                        setTimeout(()=>{
-                            this.drawLine(previousPositon, track.position)
-                            previousPositon = track.position
-                        }, track.time)
-                    })
-                })
-            }
-
         },
         initCanvas(element) {
             element.width = '540'
