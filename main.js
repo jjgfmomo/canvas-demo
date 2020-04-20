@@ -79,11 +79,11 @@
             document.querySelector('#playButton').onclick = e => {
                 document.querySelector('#clearButton').click()
                 this.model.data.recordData.track.forEach(stroke => {
-                    let previousPositon = stroke[0].position
+                    let previousPosition = stroke[0].position
                     stroke.forEach( track => {
                         setTimeout(()=>{
-                            this.drawLine(previousPositon, track.position)
-                            previousPositon = track.position
+                            this.drawLine(previousPosition, track.position)
+                            previousPosition = track.position
                         }, track.time)
                     })
                 })
