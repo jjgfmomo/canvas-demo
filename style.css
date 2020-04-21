@@ -12,4 +12,19 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+
+}
+#canvas{
+    position: absolute;
+}
+#star{
+    position: absolute;
+    z-index: 1;
+    left: calc(50% + 279px);
+}
+.buttons{
+    position: absolute;
+    right: calc(50% + 279px);
+    z-index: 1;
 }

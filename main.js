@@ -2,9 +2,7 @@
     let view = {
         el: '#canvas',
         template: `
-            <button id = "recordButton">开始录制</button>
-            <button id = "clearButton">清屏</button>
-            <button id = "playButton">播放</button>
+
         `,
         render(data){
             document.querySelector(this.el).insertAdjacentHTML('beforebegin',this.template)
@@ -23,7 +21,7 @@
             using: false,
             recordState: false,
             recordData: {
-                track: [],
+
             },
             recordStartTime: '',
         },
@@ -51,6 +49,26 @@
             this.view.render(this.model.data)
             this.canvas = this.initCanvas(this.view.getThisElement())
             this.addListener()
+            const starElement = document.querySelector('#star')
+            const  stickersElement = document.querySelector('.stickers')
+            starElement.onclick = e => {
+                const cloneNode = starElement.cloneNode(true)
+                stickersElement.appendChild(cloneNode)
+            }
+            let state = false
+            starElement.onmousedown = e => {
+                e.preventDefault()
+                state = true
+            }
+            starElement.onmousemove = e => {
+                if (state){
+                    console.log(e.clientX)
+                    console.log(e.clientY)
+                }
+            }
+            starElement.onmouseup = e => {
+                state = false
+            }
         },
         addListener() {
             this.listenCanvasOnmousedown()
@@ -64,6 +82,7 @@
             document.querySelector('#recordButton').onclick = e => {
                 this.model.switchRecordState()
                 if (this.model.data.recordState){
+                    this.model.data.recordData.track = []
                     this.model.data.recordStartTime = new Date().getTime()
                 }else {
                     console.log(this.model.data.recordData)
@@ -75,20 +94,24 @@
                 this.canvas.clearRect(0, 0, this.view.getThisElement().getClientRects()[0].width, this.view.getThisElement().getClientRects()[0].height)
             }
         },
+        clearCanvas() {
+            document.querySelector('#clearButton').click()
+        },
         listenPlayButtonOnclick() {
             document.querySelector('#playButton').onclick = e => {
-                document.querySelector('#clearButton').click()
-                this.model.data.recordData.track.forEach(stroke => {
-                    let previousPosition = stroke[0].position
-                    stroke.forEach( track => {
-                        setTimeout(()=>{
-                            this.drawLine(previousPosition, track.position)
-                            previousPosition = track.position
-                        }, track.time)
+                this.clearCanvas()
+                if (this.model.data.recordData.track) {
+                    this.model.data.recordData.track.forEach(stroke => {
+                        let previousPosition = stroke[0].position
+                        stroke.forEach( track => {
+                            setTimeout(()=>{
+                                this.drawLine(previousPosition, track.position)
+                                previousPosition = track.position
+                            }, track.time)
+                        })
                     })
-                })
+                }else console.log('没有进行录制')
             }
-
         },
         listenCanvasOnmousedown() {
             document.querySelector('#canvas').onmousedown = e => {
@@ -120,8 +143,10 @@
         listenCanvasOnmouseup() {
             document.querySelector('#canvas').onmouseup = e => {
                 this.model.data.using = false
-                this.model.data.recordData.track.push(this.model.data.stroke)
-                this.model.data.stroke = []
+                if (this.model.data.recordState){
+                    this.model.data.recordData.track.push(this.model.data.stroke)
+                    this.model.data.stroke = []
+                }
             }
         },
         initCanvas(element) {
