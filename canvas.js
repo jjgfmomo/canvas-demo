@@ -12,12 +12,14 @@
     }
     let model = {
         data: {
+            currentData: null,
             position: {
                 x: undefined,
                 y: undefined
             },
             stroke: [],
             using: false,
+            usingEraser: false,
             recordState: false,
             recordData: {
 
@@ -38,36 +40,23 @@
         },
         switchRecordState() {
             this.data.recordState = ! this.data.recordState
-        }
-        // init() {}
+        },
+
     }
     let controller = {
         init(view, model) {
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.canvas = this.initCanvas(this.view.getThisElement())
             this.addListener()
-            const starElement = document.querySelector('#star')
-            const  stickersElement = document.querySelector('.stickers')
-            starElement.onclick = e => {
-                const cloneNode = starElement.cloneNode(true)
-                stickersElement.appendChild(cloneNode)
-            }
-            let state = false
-            starElement.onmousedown = e => {
-                e.preventDefault()
-                state = true
-            }
-            starElement.onmousemove = e => {
-                if (state){
-                    console.log(e.clientX)
-                    console.log(e.clientY)
-                }
-            }
-            starElement.onmouseup = e => {
-                state = false
-            }
+            this.canvas = this.initCanvas(this.view.getThisElement())
+            window.eventHub.on('updatedCanvasSetting', e => {
+                this.model.data.currentData = e
+                this.updateCanvasColor(e.color)
+            })
+        },
+        updateCanvasColor(color) {
+            this.canvas.strokeStyle = color
         },
         addListener() {
             this.listenCanvasOnmousedown()
@@ -84,7 +73,6 @@
                     this.model.data.recordData.track = []
                     this.model.data.recordStartTime = new Date().getTime()
                 }else {
-                    console.log(this.model.data.recordData)
                 }
             }
         },
@@ -114,20 +102,26 @@
         },
         listenCanvasOnmousedown() {
             document.querySelector('#canvas').onmousedown = e => {
-                this.model.data.using = true
-                let position = this.model.convertPosition(this.view.getThisElement().getClientRects()[0],{x: e.clientX, y: e.clientY})
-                this.model.setPosition(position)
+                if (this.model.data.currentData.pointer == 'eraser') {
+                    this.model.data.using = false
+                    this.model.data.usingEraser = true
+                }else {
+                    this.model.data.using = true
+                    this.model.data.usingEraser = false
+                    let position = this.model.convertPosition(this.view.getThisElement().getClientRects()[0],{x: e.clientX, y: e.clientY})
+                    this.model.setPosition(position)
+                }
             }
         },
         listenCanvasOnmousemove() {
             document.querySelector('#canvas').onmousemove = e => {
+                let newPosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                }
+                newPosition = this.model.convertPosition(this.view.getThisElement().getClientRects()[0], newPosition)
                 if (this.model.data.using){
-                    let newPosition = {
-                        x: e.clientX,
-                        y: e.clientY
-                    }
-                    newPosition = this.model.convertPosition(this.view.getThisElement().getClientRects()[0], newPosition)
-                    this.drawLine(this.model.data.position, newPosition)
+                     this.drawLine(this.model.data.position, newPosition)
                     this.model.setPosition(newPosition)
                     if (this.model.data.recordState) {
                         const trackData = {
@@ -136,12 +130,18 @@
                         }
                         this.model.data.stroke.push(trackData)
                     }
+                }else {
+                    if (this.model.data.usingEraser){
+                        console.log(e.clientX)
+                        this.canvas.clearRect(newPosition.x, newPosition.y, 15, 15)
+                    }
                 }
             }
         },
         listenCanvasOnmouseup() {
             document.querySelector('#canvas').onmouseup = e => {
                 this.model.data.using = false
+                this.model.data.usingEraser = false
                 if (this.model.data.recordState){
                     this.model.data.recordData.track.push(this.model.data.stroke)
                     this.model.data.stroke = []
@@ -157,7 +157,6 @@
         },
         drawLine(start,end){
             this.canvas.beginPath()
-            this.canvas.strokeStyle  = 'red'
             this.canvas.moveTo(start.x,start.y)
             this.canvas.lineTo(end.x,end.y)
             this.canvas.lineWidth = 3
