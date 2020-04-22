@@ -7,20 +7,54 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>cancas Demo</title>
     <link rel="stylesheet" href="style.css">
+    <script src="//at.alicdn.com/t/font_1771704_f9fxd4c9lvd.js"></script>
+    <style type="text/css">
+    </style>
 </head>
 <body>
-    <div class="canvas-wrapper">
-        <div class="buttons">
+    <main>
+        <section id="tools">
+            <svg class="icon tools-item" aria-hidden="true">
+                <use xlink:href="#icon-pencil"></use>
+            </svg>
+            <svg class="icon tools-item" aria-hidden="true">
+                <use xlink:href="#icon-earser"></use>
+            </svg>
+            <div class="tools-item black"></div>
+            <div class="tools-item blue"></div>
+            <div class="tools-item red"></div>
+            <svg class="icon tools-item" aria-hidden="true">
+                <use xlink:href="#icon-back"></use>
+            </svg>
+        </section>
+        <section id="canvas-wrapper">
+            <canvas id="canvas"></canvas>
+        </section>
+        <section id="stickers">
+            <div class="stickers-navigation">
+                <div class="navigation-item">笔画图</div>
+                <div class="navigation-item">静态图</div>
+                <div class="navigation-item">动态图</div>
+                <div class="navigation-item">视频</div>
+            </div>
+        </section>
+        <section id="tips">
+
+        </section>
+    </main>
+    <footer>
+        <section id="steps">
+            STEPS 1
+        </section>
+        <section id="operation">
             <button id = "recordButton">开始录制</button>
+            <button id = "pauseButton">暂停录制</button>
+            <button id = "finishButton">完成录制</button>
+            <button id = "re-recordButton">完成录制</button>
             <button id = "clearButton">清屏</button>
             <button id = "playButton">播放</button>
-        </div>
-        <canvas id="canvas"></canvas>
-        <div class="stickers">
-            <img id='star' src="./star.jpg" alt="" width="50px" height="50px">
-        </div>
-
-    </div>
+        </section>
+    </footer>
 </body>
 <script src="main.js"></script>
 </html>

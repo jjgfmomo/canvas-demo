@@ -2,7 +2,6 @@
     let view = {
         el: '#canvas',
         template: `
-
         `,
         render(data){
             document.querySelector(this.el).insertAdjacentHTML('beforebegin',this.template)
@@ -150,8 +149,8 @@
             }
         },
         initCanvas(element) {
-            element.width = '540'
-            element.height = '770'
+            element.width = '500'
+            element.height = '624'
             element.style.backgroundImage = `url("./1.JPG")`
             element.style.backgroundSize = 'contain'
             return element.getContext('2d')
