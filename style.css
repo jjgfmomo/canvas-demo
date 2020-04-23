@@ -28,3 +28,14 @@ footer #operations button{border-radius: 20px;background-color: dodgerblue;paddi
 #video-container{
     position: relative;
 }
+.v{
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    line-height: 10px;
+    text-align: center;
+    background-color: black;
+    color: white;
+}

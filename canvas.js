@@ -44,7 +44,6 @@
     }
     let controller = {
         init(view, model) {
-            const canvas = document.querySelector("#canvas")
             this.view = view
             this.model = model
             this.view.render(this.model.data)
@@ -74,6 +73,7 @@
                 this.model.switchRecordState()
                 if (this.model.data.recordState){
                     this.model.data.recordData.track = []
+                    this.model.data.recordData.strikes = []
                     this.model.data.recordStartTime = new Date().getTime()
                 }else {
                 }
@@ -81,7 +81,7 @@
         },
         listenClearButtonOnclick() {
             document.querySelector('#clearButton').onclick = e => {
-                this.canvas.clearRect(0, 0, this.view.getCanvas().getClientRects()[0].width, this.view.getCanvas().getClientRects()[0].height)
+                this.canvas.clearRect(0, 0, canvas.getClientRects()[0].width, canvas.getClientRects()[0].height)
             }
         },
         clearCanvas() {
@@ -150,6 +150,7 @@
             }
         },
         initCanvas() {
+            console.log(canvas)
             canvas.width = '500'
             canvas.height = '624'
             canvas.style.backgroundImage = `url("./1.JPG")`
@@ -158,30 +159,54 @@
         },
         createStickerAndBindEvent(html, selector) {
             let wrapperElement = document.querySelector(selector)
-            wrapperElement.insertAdjacentHTML('beforeend', html)
-            let newElement = wrapperElement.lastChild
-            newElement.style.position = 'absolute'
-            newElement.style.top = '0px'
-            newElement.style.left = '0px'
+            let posDiv = document.createElement('div')
+            posDiv.insertAdjacentHTML('beforeend', html)
+            posDiv.style.position = 'absolute'
+            posDiv.style.width = 'auto'
+            posDiv.style.border = '3px dotted black'
+            posDiv.setAttribute('class', 'pos')
+            let v = document.createElement('div')
+            v.setAttribute('class','v')
+            v.innerHTML = 'V'
+            posDiv.append(v)
+            wrapperElement.appendChild(posDiv)
+            let newElement = posDiv
+            let pointerX,  pointerY
             let state = false
-            let pointerX, pointerY
+            v.onclick = e => {
+                state = false
+                console.log(1)
+                if (this.model.data.recordState){
+                    this.model.data.recordData.strikes.push({
+                        time: new Date().getTime() - this.model.data.recordStartTime,
+                        url: 'heart.png',
+                        position: {
+                            x: posDiv.offsetLeft,
+                            y: posDiv.offsetTop
+                        }
+                    })
+                }
+                v.remove()
+                posDiv.style.border = 'none'
+                posDiv.onmousedown = ev => {}
+            }
             newElement.onmousedown = e => {
                 state = true
                 pointerX = e.clientX
                 pointerY = e.clientY
-            }
-            newElement.onmouseup = e => {
-                state = false
-            }
-            wrapperElement.onmousemove = e => {
-                e.preventDefault()
-                if (state){
-                    let dX =  e.clientX - pointerX
-                    let dY =  e.clientY - pointerY
-                    newElement.style.left = newElement.offsetLeft + dX + 'px'
-                    newElement.style.top = newElement.offsetTop + dY + 'px'
-                    pointerX = e.clientX
-                    pointerY = e.clientY
+                newElement.onmouseup = e => {
+                    state = false
+                }
+                wrapperElement.onmousemove = e => {
+                    e.preventDefault()
+                    if (state){
+                        let dX =  e.clientX - pointerX
+                        let dY =  e.clientY - pointerY
+                        newElement.style.left = newElement.offsetLeft + dX + 'px'
+                        newElement.style.top = newElement.offsetTop + dY + 'px'
+                        pointerX = e.clientX
+                        pointerY = e.clientY
+                    }
                 }
             }
         },
@@ -192,8 +217,7 @@
             this.canvas.lineWidth = 3
             this.canvas.stroke()
             this.canvas.closePath()
-        },
-
+        }
     }
     controller.init(view,model)
 }

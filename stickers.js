@@ -50,7 +50,7 @@
             const star = document.querySelector('#star')
             star.onclick = e => {
                 window.eventHub.emit('createStickerAndBindEvent', {
-                    html:  ` <img id="star" src="./heart.png" alt="" width="60px" height="60px">`,
+                    html:  ` <img src="./heart.png" alt="" width="60px" height="60px">`,
                     selector: '#canvas-wrapper'
                 })
             }
@@ -68,7 +68,7 @@
             videoTest.onclick = e => {
                 e.preventDefault()
                 window.eventHub.emit('createStickerAndBindEvent', {
-                    html:  `<video src="./vvv.mp4" id="video111"  autoplay muted width="100px" height="180px"></video>`,
+                    html:  `<video src="./vvv.mp4"  id="video111"  autoplay muted width="100px" height="180px"></video>`,
                     selector: '#video-container'
                 })
             }
