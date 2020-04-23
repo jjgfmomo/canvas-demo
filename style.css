@@ -22,9 +22,9 @@ footer #operations button{border-radius: 20px;background-color: dodgerblue;paddi
     position: relative;
     right: -10px;
 }
-video{
-    position: absolute;
-}
 .stickers-show{
     display: none;
+}
+#video-container{
+    position: relative;
 }

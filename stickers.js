@@ -42,47 +42,17 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.test()
+            this.imageTest()
             this.listenNavSelect()
             this.videoTest()
         },
-        test() {
-            let star = document.querySelector('#star')
-            const canvas = document.querySelector('#canvas-wrapper')
-            let pointerX, pointerY
-            let state = false
+        imageTest() {
+            const star = document.querySelector('#star')
             star.onclick = e => {
-                e.preventDefault()
-                let newNode = star.cloneNode(true)
-                newNode.style.position = 'absolute'
-                canvas.appendChild(newNode)
-                newNode.onmousedown = e => {
-                    pointerX = e.clientX
-                    pointerY = e.clientY
-                    state = true
-                }
-                canvas.onmousemove = e => {
-                    e.preventDefault()
-                    if (newNode.offsetLeft >= 0 && newNode.offsetTop >= 0 && (newNode.offsetTop + newNode.offsetHeight) <= canvas.offsetHeight && (newNode.offsetLeft + newNode.offsetWidth) <= canvas.offsetWidth) {
-                        if (state) {
-                            let dX =  e.clientX - pointerX
-                            let dY =  e.clientY - pointerY
-                            newNode.style.left = newNode.offsetLeft + dX + 'px'
-                            newNode.style.top = newNode.offsetTop + dY + 'px'
-                            pointerX = e.clientX
-                            pointerY = e.clientY
-                        }
-                    }else {
-                        state = false
-                        if (newNode.offsetLeft < 0) newNode.style.left = '0px'
-                        if (newNode.offsetTop < 0) newNode.style.top = '0px'
-                        if ((newNode.offsetTop + newNode.offsetHeight) > canvas.offsetHeight) newNode.style.top = canvas.offsetHeight - newNode.offsetHeight + 'px'
-                        if ((newNode.offsetLeft + newNode.offsetWidth) > canvas.offsetWidth) newNode.style.left = canvas.offsetWidth - newNode.offsetWidth + 'px'
-                    }
-                }
-                newNode.onmouseup = e => {
-                    state = false
-                }
+                window.eventHub.emit('createStickerAndBindEvent', {
+                    html:  ` <img id="star" src="./heart.png" alt="" width="60px" height="60px">`,
+                    selector: '#canvas-wrapper'
+                })
             }
         },
         listenNavSelect(){
@@ -94,37 +64,16 @@
             })
         },
         videoTest(){
-            const canvas = document.querySelector('#canvas-wrapper')
             const videoTest = document.querySelector('.videoTest')
-            const videoHtml = `<video src="./vvv.mp4" id="video111"  autoplay muted width="100px" height="180px"></video>`
-            let state = false
-            let pointerX, pointerY
             videoTest.onclick = e => {
-                canvas.insertAdjacentHTML('beforeend', videoHtml)
-                let newVideo = document.querySelector('#video111')
-
-                newVideo.onmousedown = e => {
-                    state = true
-                    pointerX = e.clientX
-                    pointerY = e.clientY
-                    console.log(1)
-                }
-                newVideo.onmouseup = e => {
-                    state = false
-                }
-                document.querySelector('#video-container').onmousemove = e => {
-                    e.preventDefault()
-                    if (state){
-                        let dX =  e.clientX - pointerX
-                        let dY =  e.clientY - pointerY
-                        newVideo.style.left = newVideo.offsetLeft + dX + 'px'
-                        newVideo.style.top = newVideo.offsetTop + dY + 'px'
-                        pointerX = e.clientX
-                        pointerY = e.clientY
-                    }
-                }
+                e.preventDefault()
+                window.eventHub.emit('createStickerAndBindEvent', {
+                    html:  `<video src="./vvv.mp4" id="video111"  autoplay muted width="100px" height="180px"></video>`,
+                    selector: '#video-container'
+                })
             }
-        }
+        },
+
     }
     controller.init(view,model)
 }
