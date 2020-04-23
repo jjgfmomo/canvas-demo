@@ -56,40 +56,20 @@
             window.eventHub.on('createStickerAndBindEvent', e => {
                 this.createStickerAndBindEvent(e.html, e.selector)
             })
-        },
-        updateCanvasColor(color) {
-            this.canvas.strokeStyle = color
-        },
-        addListener() {
-            this.listenCanvasOnmousedown()
-            this.listenCanvasOnmousemove()
-            this.listenCanvasOnmouseup()
-            this.listenRecordButtonOnclick()
-            this.listenClearButtonOnclick()
-            this.listenPlayButtonOnclick()
-        },
-        listenRecordButtonOnclick() {
-            document.querySelector('#recordButton').onclick = e => {
+            window.eventHub.on('switchRecordState',() => {
                 this.model.switchRecordState()
                 if (this.model.data.recordState){
                     this.model.data.recordData.track = []
                     this.model.data.recordData.strikes = []
                     this.model.data.recordStartTime = new Date().getTime()
                 }else {
+                    console.log(JSON.stringify(this.model.data.recordData))
                 }
-            }
-        },
-        listenClearButtonOnclick() {
-            document.querySelector('#clearButton').onclick = e => {
+            } )
+            window.eventHub.on('clearCanvas', () => {
                 this.canvas.clearRect(0, 0, canvas.getClientRects()[0].width, canvas.getClientRects()[0].height)
-            }
-        },
-        clearCanvas() {
-            document.querySelector('#clearButton').click()
-        },
-        listenPlayButtonOnclick() {
-            document.querySelector('#playButton').onclick = e => {
-                this.clearCanvas()
+            })
+            window.eventHub.on('play', () => {
                 if (this.model.data.recordData.track) {
                     this.model.data.recordData.track.forEach(stroke => {
                         let previousPosition = stroke[0].position
@@ -100,9 +80,18 @@
                             }, track.time)
                         })
                     })
-                }else console.log('没有进行录制')
-            }
+                } else console.log('没有进行录制')
+            })
         },
+        updateCanvasColor(color) {
+            this.canvas.strokeStyle = color
+        },
+        addListener() {
+            this.listenCanvasOnmousedown()
+            this.listenCanvasOnmousemove()
+            this.listenCanvasOnmouseup()
+        },
+
         listenCanvasOnmousedown() {
             canvas.onmousedown = e => {
                 if (this.model.data.drawingBoardData.pointer == 'eraser') {
@@ -150,7 +139,6 @@
             }
         },
         initCanvas() {
-            console.log(canvas)
             canvas.width = '500'
             canvas.height = '624'
             canvas.style.backgroundImage = `url("./1.JPG")`

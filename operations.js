@@ -21,7 +21,29 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-        }
+            this.addListener()
+        },
+        addListener() {
+            this.listenRecordButtonOnclick()
+            this.listenClearButtonOnclick()
+            this.listenPlayButtonOnclick()
+        },
+        listenRecordButtonOnclick() {
+            recordButton.onclick = e => {
+                window.eventHub.emit('switchRecordState')
+            }
+        },
+        listenClearButtonOnclick() {
+            clearButton.onclick = e => {
+                window.eventHub.emit('clearCanvas')
+            }
+        },
+        listenPlayButtonOnclick() {
+            playButton.onclick = e => {
+                window.eventHub.emit('clearCanvas')
+                window.eventHub.emit('play')
+            }
+        },
     }
     controller.init(view,model)
 }
