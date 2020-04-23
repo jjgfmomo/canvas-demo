@@ -21,9 +21,7 @@
             using: false,
             usingEraser: false,
             recordState: false,
-            recordData: {
-
-            },
+            recordData: {},
             recordStartTime: '',
         },
         convertPosition(canvasRect, position) {
@@ -121,12 +119,12 @@
                 }
                 newPosition = this.model.convertPosition(this.view.getThisElement().getClientRects()[0], newPosition)
                 if (this.model.data.using){
-                     this.drawLine(this.model.data.position, newPosition)
+                    this.drawLine(this.model.data.position, newPosition)
                     this.model.setPosition(newPosition)
                     if (this.model.data.recordState) {
                         const trackData = {
                             time: new Date().getTime() - this.model.data.recordStartTime,
-                            position: JSON.parse(JSON.stringify(this.model.getPosition()))
+                            position: this.model.getPosition()
                         }
                         this.model.data.stroke.push(trackData)
                     }

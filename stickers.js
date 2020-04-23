@@ -97,9 +97,32 @@
             const canvas = document.querySelector('#canvas-wrapper')
             const videoTest = document.querySelector('.videoTest')
             const videoHtml = `<video src="./vvv.mp4" id="video111"  autoplay muted width="100px" height="180px"></video>`
+            let state = false
+            let pointerX, pointerY
             videoTest.onclick = e => {
                 canvas.insertAdjacentHTML('beforeend', videoHtml)
-                document.querySelector('#video111')
+                let newVideo = document.querySelector('#video111')
+
+                newVideo.onmousedown = e => {
+                    state = true
+                    pointerX = e.clientX
+                    pointerY = e.clientY
+                    console.log(1)
+                }
+                newVideo.onmouseup = e => {
+                    state = false
+                }
+                document.querySelector('#video-container').onmousemove = e => {
+                    e.preventDefault()
+                    if (state){
+                        let dX =  e.clientX - pointerX
+                        let dY =  e.clientY - pointerY
+                        newVideo.style.left = newVideo.offsetLeft + dX + 'px'
+                        newVideo.style.top = newVideo.offsetTop + dY + 'px'
+                        pointerX = e.clientX
+                        pointerY = e.clientY
+                    }
+                }
             }
         }
     }

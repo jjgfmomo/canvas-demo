@@ -39,27 +39,18 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.listenPointerSelected(this.model.data.pointerLists)
-            this.listenColorSelected(this.model.data.colorLists)
+            this.updatedCurrentDataByLists(this.model.data.pointerLists, 'pointer')
+            this.updatedCurrentDataByLists(this.model.data.colorLists, 'color')
             window.eventHub.emit('updatedCanvasSetting', this.model.data.currentData)
         },
-        listenPointerSelected(pointerLists) {
-            pointerLists.map(pointer => {
-                document.querySelector('.' + pointer).onclick = e => {
-                    this.model.data.currentData.pointer = pointer
+        updatedCurrentDataByLists(lists, type) {
+            lists.map(item => {
+                document.querySelector('.' + item).onclick = e => {
+                    this.model.data.currentData[type] = item
                     this.init(this.view, this.model)
                 }
             })
-        },
-        listenColorSelected(colorLists) {
-            colorLists.map(color => {
-                const colorElement = document.querySelector('.' + color)
-                colorElement.onclick = e => {
-                    this.model.data.currentData.color = color
-                    this.init(this.view, this.model)
-                }
-            })
-        },
+        }
     }
     controller.init(view,model)
 }
