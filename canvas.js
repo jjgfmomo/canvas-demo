@@ -150,7 +150,8 @@
             let posDiv = document.createElement('div')
             posDiv.insertAdjacentHTML('beforeend', html)
             posDiv.style.position = 'absolute'
-            posDiv.style.width = 'auto'
+            posDiv.style.left = '0px'
+            posDiv.style.top = '0px'
             posDiv.style.border = '3px dotted black'
             posDiv.setAttribute('class', 'pos')
             let v = document.createElement('div')
