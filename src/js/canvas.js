@@ -10,14 +10,21 @@
     }
     let model = {
         data: {
-            drawingBoardData: null,                     //画板数据
-            stroke: [],                                 //当前笔画
+            drawingBoardData: null,                     // 画板数据
+            stroke: [],                                 // 当前笔画
 
-            position: { x: undefined, y: undefined },   //当前position
-            strokeState: false,                         //画板状态
-            recordState: false,                         //录制状态
-            recordData: {},                             //录制数据
-            recordStartTime: '',                        //录制开始时间
+            position: { x: undefined, y: undefined },   // 当前position
+            strokeState: false,                         // 画板状态
+            recordState: false,                         // 录制状态
+            recordData: {},                             // 录制数据
+            recordStartTime: null,                        // 录制开始时间
+            recordPauseTime: null,
+        },
+        setRecordPauseTime(time) {
+            this.data.recordPauseTime = time
+        },
+        getRecordPauseTime() {
+            return this.data.recordPauseTime
         },
         setRecordData(tracks, strikes) {
             this.data.recordData.tracks = tracks
@@ -68,18 +75,23 @@
         getPosition() {
             return this.data.position
         },
-        switchRecordState() {
-            this.data.recordState = ! this.data.recordState
+        setRecordState(state) {
+            this.data.recordState = state
         },
+        init() {
+            this.data.recordData.tracks = []
+            this.data.recordData.strikes = []
+        }
     }
     let controller = {
         init(view, model) {
             this.view = view
             this.model = model
+            this.model.init()
             this.view.render(this.model.data)
             this.canvasContext = this.getCanvasContext('500', '624', 'url(./img/1.JPG)  ')
             this.addListener()
-            //更新画板数据
+            // 更新画板数据
             window.eventHub.on('updateDrawingBoardData', data => {
                 this.model.setDrawingBoardData(data)
             })
@@ -87,30 +99,48 @@
                 this.createStickerAndBindEvent(data.html, data.selector)
             })
             window.eventHub.on('switchRecordState',() => {
-                this.model.switchRecordState()
-                if (this.model.getRecordState()){
-                    this.model.setRecordData([], [])
-                    this.model.setRecordStartTime(new Date().getTime())
+                if (!this.model.getRecordState()){
+                    this.startRecord()
                 }else {
-                    console.log(JSON.stringify(this.model.data.recordData))
+                    this.pauseRecord()
                 }
-            } )
+            })
             window.eventHub.on('clearCanvas', () => {
                 const canvas = this.getCanvasElement()
                 this.canvasContext.clearRect(0, 0, canvas.width, canvas.height)
             })
             window.eventHub.on('play', () => {
-                if (this.model.getRecordData().tracks) {
-                    this.model.getRecordData().tracks.forEach(stroke => {
-                        let previousPosition = stroke[0].position
-                        stroke.forEach( track => {
-                            setTimeout(()=>{
-                                this.drawLine(previousPosition, track.position, track.color)
-                                previousPosition = track.position
-                            }, track.time)
+                if (!this.model.getRecordState()) {
+                    window.eventHub.emit('clearCanvas')
+                    let tracks = this.model.getRecordData().tracks
+                    if (tracks.length) {
+                        tracks.forEach(stroke => {
+                            let previousPosition = stroke[0].position
+                            stroke.forEach( track => {
+                                setTimeout(()=>{
+                                    this.drawLine(previousPosition, track.position, track.color)
+                                    previousPosition = track.position
+                                }, track.time)
+                            })
                         })
-                    })
-                } else console.log('没有进行录制')
+                    } else alert('没有进行录制')
+                }else alert('请先结束录制')
+            })
+            window.eventHub.on('finishRecord', () => {
+                if (this.model.getRecordPauseTime() || this.model.getRecordState()) {
+                    document.querySelector('#recordButton').innerHTML = '开始录制'
+                    console.log(JSON.stringify(this.model.getRecordData()))
+                    this.model.setRecordPauseTime(null)
+                    this.model.setRecordState(false)
+                    alert('录制完成')
+                }else alert('您没有开始录制')
+            })
+            window.eventHub.on('re-record', () => {
+                window.eventHub.emit('clearCanvas')
+                this.model.setRecordState(false)
+                document.querySelector('#recordButton').innerHTML = '开始录制'
+                this.model.setRecordData([], [])
+                this.model.setRecordPauseTime(null)
             })
             this.addListener()
         },
@@ -131,19 +161,22 @@
             const canvasRect = canvas.getClientRects()[0]
             document.querySelector('html').onmousemove = e => {
                 e.preventDefault()
-                //判断鼠标坐标超出范围
+                // 判断鼠标坐标超出范围
                 if (e.x < canvasRect.x || e.x > canvasRect.x + canvasRect.width || e.y < canvasRect.y || e.y > canvasRect.y + canvasRect.height) {
                     this.model.setStrokeState(false)
                 }else {
                     const position = { x: e.clientX, y: e.clientY }
                     const newPosition = this.model.convertPosition(canvasRect, position)
-                    //判断当前是否在画
+                    // 判断当前是否在画
                     if (this.model.getStrokeState()) {
-                        //画板为 pen 模式
+                        // 画板为 pen 模式
                         if (this.model.getDrawingBoardData().pointer === 'pen') {
+                            // 画
                             this.drawLine(this.model.getPosition(), newPosition, this.model.getDrawingBoardData().color)
                             this.model.setPosition(newPosition)
+                            // 判断是否录制
                             if (this.model.getRecordState()) {
+                                //记录数据
                                 const strokeData = {
                                     time: new Date().getTime() - this.model.getRecordStartTime(),
                                     position: this.model.getPosition(),
@@ -152,8 +185,9 @@
                                 this.model.getStroke().push(strokeData)
                             }
                         }
-                        //画板为 eraser 模式
+                        // 画板为 eraser 模式
                         if (this.model.getDrawingBoardData().pointer === 'eraser') {
+                            // 擦除
                             this.useEraser(newPosition, 15)
                         }
                     }
@@ -164,7 +198,7 @@
             this.getCanvasElement().onmouseup = e => {
                 this.model.setStrokeState(false)
                 if (this.model.getRecordState()){
-                    this.model.data.recordData.tracks.push(this.model.data.stroke) //数据结构优化
+                    this.model.data.recordData.tracks.push(this.model.data.stroke) // 数据结构优化
                     this.model.setStroke([])
                 }
             }
@@ -244,6 +278,20 @@
         getCanvasElement() {
             return document.querySelector('#canvas')
         },
+        startRecord() {
+            this.model.setRecordState(true)
+            document.querySelector('#recordButton').innerHTML = '暂停录制'
+            if (this.model.getRecordPauseTime()) {
+                this.model.setRecordStartTime(new Date().getTime() - this.model.getRecordPauseTime() + this.model.getRecordStartTime())
+            }else {
+                this.model.setRecordStartTime(new Date().getTime())
+            }
+        },
+        pauseRecord() {
+            this.model.setRecordState(false)
+            document.querySelector('#recordButton').innerHTML = '开始录制'
+            this.model.setRecordPauseTime(new Date().getTime())
+        }
     }
     controller.init(view,model)
 }

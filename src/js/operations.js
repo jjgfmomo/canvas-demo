@@ -2,14 +2,13 @@
     let view = {
         el: '#operations',
         template: `
-            <button id = "recordButton">开始录制</button>
-            <button id = "pauseButton">暂停录制</button>
-            <button id = "finishButton">完成录制</button>
-            <button id = "re-recordButton">重新录制</button>
-            <button id = "clearButton">清屏</button>
-            <button id = "playButton">播放</button>
+            <button id="recordButton">开始录制</button>
+            <button id="finishButton">结束录制</button>
+            <button id="re-recordButton">重新录制</button>
+            <button id="clearButton">清屏</button>
+            <button id="playButton">播放</button>
         `,
-        render(data) {
+        render() {
             document.querySelector(this.el).innerHTML = this.template
         }
     }
@@ -20,30 +19,22 @@
         init(view, model) {
             this.view = view
             this.model = model
-            this.view.render(this.model.data)
+            this.view.render()
             this.addListener()
         },
         addListener() {
-            this.listenRecordButtonOnclick()
-            this.listenClearButtonOnclick()
-            this.listenPlayButtonOnclick()
+            this.listenElementAndEmitEvent('#recordButton', 'switchRecordState')
+            this.listenElementAndEmitEvent('#clearButton', 'clearCanvas')
+            this.listenElementAndEmitEvent('#finishButton', 'finishRecord')
+            this.listenElementAndEmitEvent('#playButton', 'play')
+            this.listenElementAndEmitEvent('#re-recordButton', 're-record')
         },
-        listenRecordButtonOnclick() {
-            recordButton.onclick = e => {
-                window.eventHub.emit('switchRecordState')
+
+        listenElementAndEmitEvent(selector, event) {
+            document.querySelector(selector).onclick = e => {
+                window.eventHub.emit(event)
             }
-        },
-        listenClearButtonOnclick() {
-            clearButton.onclick = e => {
-                window.eventHub.emit('clearCanvas')
-            }
-        },
-        listenPlayButtonOnclick() {
-            playButton.onclick = e => {
-                window.eventHub.emit('clearCanvas')
-                window.eventHub.emit('play')
-            }
-        },
+        }
     }
     controller.init(view,model)
 }
