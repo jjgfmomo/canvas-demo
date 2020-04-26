@@ -132,12 +132,15 @@
             const canvasRect = canvas.getClientRects()[0]
             document.querySelector('html').onmousemove = e => {
                 e.preventDefault()
+                //判断鼠标坐标超出范围
                 if (e.x < canvasRect.x || e.x > canvasRect.x + canvasRect.width || e.y < canvasRect.y || e.y > canvasRect.y + canvasRect.height) {
                     this.model.setStrokeState(false)
                 }else {
                     const position = { x: e.clientX, y: e.clientY }
                     const newPosition = this.model.convertPosition(canvasRect, position)
+                    //判断当前是否在画
                     if (this.model.getStrokeState()) {
+                        //画板为 pen 模式
                         if (this.model.getDrawingBoardData().pointer === 'pen') {
                             this.drawLine(this.model.getPosition(), newPosition, this.model.getDrawingBoardData().color)
                             this.model.setPosition(newPosition)
@@ -150,6 +153,7 @@
                                 this.model.getStroke().push(strokeData)
                             }
                         }
+                        //画板为 eraser 模式
                         if (this.model.getDrawingBoardData().pointer === 'eraser') {
                             this.useEraser(newPosition, 15)
                         }
