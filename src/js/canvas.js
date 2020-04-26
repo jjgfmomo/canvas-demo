@@ -128,24 +128,31 @@
             }
         },
         listenCanvasOnmousemove() {
-            this.getCanvasElement().onmousemove = e => {
-                const position = { x: e.clientX, y: e.clientY }
-                const newPosition = this.model.convertPosition(this.getCanvasElement().getClientRects()[0], position)
-                if (this.model.getStrokeState()) {
-                    if (this.model.getDrawingBoardData().pointer === 'pen') {
-                        this.drawLine(this.model.getPosition(), newPosition, this.model.getDrawingBoardData().color)
-                        this.model.setPosition(newPosition)
-                        if (this.model.getRecordState()) {
-                            const strokeData = {
-                                time: new Date().getTime() - this.model.getRecordStartTime(),
-                                position: this.model.getPosition(),
-                                color: this.model.getDrawingBoardData().color
+            const canvas = this.getCanvasElement()
+            const canvasRect = canvas.getClientRects()[0]
+            document.querySelector('html').onmousemove = e => {
+                e.preventDefault()
+                if (e.x < canvasRect.x || e.x > canvasRect.x + canvasRect.width || e.y < canvasRect.y || e.y > canvasRect.y + canvasRect.height) {
+                    this.model.setStrokeState(false)
+                }else {
+                    const position = { x: e.clientX, y: e.clientY }
+                    const newPosition = this.model.convertPosition(canvasRect, position)
+                    if (this.model.getStrokeState()) {
+                        if (this.model.getDrawingBoardData().pointer === 'pen') {
+                            this.drawLine(this.model.getPosition(), newPosition, this.model.getDrawingBoardData().color)
+                            this.model.setPosition(newPosition)
+                            if (this.model.getRecordState()) {
+                                const strokeData = {
+                                    time: new Date().getTime() - this.model.getRecordStartTime(),
+                                    position: this.model.getPosition(),
+                                    color: this.model.getDrawingBoardData().color
+                                }
+                                this.model.getStroke().push(strokeData)
                             }
-                            this.model.getStroke().push(strokeData)
                         }
-                    }
-                    if (this.model.getDrawingBoardData().pointer === 'eraser') {
-                        this.useEraser(newPosition, 15)
+                        if (this.model.getDrawingBoardData().pointer === 'eraser') {
+                            this.useEraser(newPosition, 15)
+                        }
                     }
                 }
             }
