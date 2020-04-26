@@ -9,16 +9,16 @@
                 <div class="navigation-item" id="video">视频</div>
             </div>
             <div class="static stickers-show">
-                <img id="star" src="./heart.png" alt="" width="60px" height="60px">
-                <img id="star1" src="./star.png" alt="" width="60px" height="60px">
+                <img id="star" src="./img/heart.png" alt="" width="60px" height="60px">
+                <img id="star1" src="./img/star.png" alt="" width="60px" height="60px">
             </div>
             <div class="dynamic stickers-show">
-                <img id="star1" src="./2.gif" alt="" width="60px" height="60px">
+                <img id="star1" src="./img/2.gif" alt="" width="60px" height="60px">
             </div>
             <div class="strokes stickers-show">
-                <img id="star" src="./heart.png" alt="" width="60px" height="60px">
-                <img id="star1" src="./2.gif" alt="" width="60px" height="60px">
-                <img id="star1" src="./star.png" alt="" width="60px" height="60px">
+                <img id="star" src="./img/heart.png" alt="" width="60px" height="60px">
+                <img id="star1" src="./img/2.gif" alt="" width="60px" height="60px">
+                <img id="star1" src="./img/star.png" alt="" width="60px" height="60px">
             </div>
             <div class="video stickers-show">
                 <div class="videoTest" style="width:60px;height=60px;line-height: 60px;text-align: center;font-size: 35px;background-color: hotpink;">话</div>
@@ -34,7 +34,7 @@
         data: {
             navLists: ['static', 'dynamic', 'strokes', 'video'],
             currentNav: 'static',
-            videoLists: './vvv.mp4'
+            videoLists: '/vvv.mp4'
         }
     }
     let controller = {
@@ -50,7 +50,7 @@
             const star = document.querySelector('#star')
             star.onclick = e => {
                 window.eventHub.emit('createStickerAndBindEvent', {
-                    html:  ` <img src="./heart.png" alt="" width="60px" height="60px">`,
+                    html:  ` <img src="./img/heart.png" alt="" width="60px" height="60px">`,
                     selector: '#canvas-wrapper'
                 })
             }
@@ -68,7 +68,7 @@
             videoTest.onclick = e => {
                 e.preventDefault()
                 window.eventHub.emit('createStickerAndBindEvent', {
-                    html:  `<video src="./vvv.mp4"  id="video111"  autoplay muted width="100px" height="180px"></video>`,
+                    html:  `<video src="./img/vvv.mp4"  id="video111"  autoplay muted width="100px" height="180px"></video>`,
                     selector: '#video-container'
                 })
             }

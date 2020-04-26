@@ -141,7 +141,7 @@
         initCanvas() {
             canvas.width = '500'
             canvas.height = '624'
-            canvas.style.backgroundImage = `url("./1.JPG")`
+            canvas.style.backgroundImage = `url("./img/1.JPG")`
             canvas.style.backgroundSize = 'contain'
             return canvas.getContext('2d')
         },
