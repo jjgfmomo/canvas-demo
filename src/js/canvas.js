@@ -13,17 +13,20 @@
             drawingBoardData: null, //画板数据
             stroke: [],             //当前笔画
 
-            position: {             //当前positon
+            position: {             //当前position
                 x: undefined,
                 y: undefined
             },
-
             strokeState: false,
             usingEraser: false,
 
             recordState: false,
             recordData: {},
             recordStartTime: '',
+        },
+        setRecordData(tracks, strikes) {
+            this.data.recordData.tracks = tracks
+            this.data.recordData.strikes = strikes
         },
         convertPosition(canvasRect, position) {
             return {
@@ -77,6 +80,7 @@
             this.model = model
             this.view.render(this.model.data)
             this.canvasContext = this.getCanvasContext('500', '624', 'url(./img/1.JPG)  ')
+            this.addListener()
             window.eventHub.on('updatedCanvasSetting', data => {
                 this.model.setDrawingBoardData(data)
             })
@@ -86,10 +90,8 @@
             window.eventHub.on('switchRecordState',() => {
                 this.model.switchRecordState()
                 if (this.model.data.recordState){
-                    this.model.data.recordData.track = []
-                    this.model.data.recordData.strikes = []
-                    this.model.data.recordStartTime = new Date().getTime()
-                    console.log(this.model.data.recordStartTime)
+                    this.model.setRecordData([], [])
+                    this.model.setRecordStartTime(new Date().getTime())
                 }else {
                     console.log(JSON.stringify(this.model.data.recordData))
                 }
@@ -99,8 +101,8 @@
                 this.canvasContext.clearRect(0, 0, canvas.width, canvas.height)
             })
             window.eventHub.on('play', () => {
-                if (this.model.data.recordData.track) {
-                    this.model.data.recordData.track.forEach(stroke => {
+                if (this.model.data.recordData.tracks) {
+                    this.model.data.recordData.tracks.forEach(stroke => {
                         let previousPosition = stroke[0].position
                         stroke.forEach( track => {
                             setTimeout(()=>{
@@ -152,7 +154,7 @@
             this.getCanvasElement().onmouseup = e => {
                 this.model.setStrokeState(false)
                 if (this.model.getRecordState()){
-                    this.model.data.recordData.track.push(this.model.data.stroke) //数据结构优化
+                    this.model.data.recordData.tracks.push(this.model.data.stroke) //数据结构优化
                     this.model.setStroke([])
                 }
             }
@@ -165,7 +167,6 @@
             canvas.width = width
             canvas.height = height
             canvas.style.backgroundImage = backgroundUrl
-            console.log(canvas.style.height)
             return canvas.getContext('2d')
         },
         createStickerAndBindEvent(html, selector) {
@@ -187,7 +188,6 @@
             let state = false
             v.onclick = e => {
                 state = false
-                console.log(1)
                 if (this.model.data.recordState){
                     this.model.data.recordData.strikes.push({
                         time: new Date().getTime() - this.model.data.recordStartTime,
