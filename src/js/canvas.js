@@ -11,13 +11,14 @@
     let model = {
         data: {
             drawingBoardData: null, //画板数据
-            stroke: [], //当前笔画
-            position: {
+            stroke: [],             //当前笔画
+
+            position: {             //当前positon
                 x: undefined,
                 y: undefined
             },
 
-            using: false,
+            strokeState: false,
             usingEraser: false,
 
             recordState: false,
@@ -29,6 +30,36 @@
                 x: position.x - canvasRect.x,
                 y: position.y - canvasRect.y
             }
+        },
+        setStroke(data) {
+            this.data.stroke = data
+        },
+        getStroke() {
+            return this.data.stroke
+        },
+        setRecordStartTime(time) {
+            this.data.recordStartTime = time
+        },
+        getRecordStartTime() {
+            return this.data.recordStartTime
+        },
+        setDrawingBoardData(data) {
+            this.data.drawingBoardData = data
+        },
+        getDrawingBoardData() {
+          return this.data.drawingBoardData
+        },
+        setStrokeState(state) {
+            this.data.strokeState = state
+        },
+        getStrokeState() {
+            return this.data.strokeState
+        },
+        setRecordState(state) {
+            this.data.recordState = state
+        },
+        getRecordState(state) {
+            return this.data.recordState
         },
         setPosition(position) {
             this.data.position = position
@@ -45,11 +76,9 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.addListener()
-            this.canvas = this.initCanvas()
+            this.canvasContext = this.getCanvasContext('500', '624', 'url(./img/1.JPG)  ')
             window.eventHub.on('updatedCanvasSetting', data => {
-                this.model.data.drawingBoardData = data
-                this.updateCanvasColor(data.color)
+                this.model.setDrawingBoardData(data)
             })
             window.eventHub.on('createStickerAndBindEvent', data => {
                 this.createStickerAndBindEvent(data.html, data.selector)
@@ -60,12 +89,14 @@
                     this.model.data.recordData.track = []
                     this.model.data.recordData.strikes = []
                     this.model.data.recordStartTime = new Date().getTime()
+                    console.log(this.model.data.recordStartTime)
                 }else {
                     console.log(JSON.stringify(this.model.data.recordData))
                 }
             } )
             window.eventHub.on('clearCanvas', () => {
-                this.canvas.clearRect(0, 0, canvas.getClientRects()[0].width, canvas.getClientRects()[0].height)
+                const canvas = this.getCanvasElement()
+                this.canvasContext.clearRect(0, 0, canvas.width, canvas.height)
             })
             window.eventHub.on('play', () => {
                 if (this.model.data.recordData.track) {
@@ -73,16 +104,14 @@
                         let previousPosition = stroke[0].position
                         stroke.forEach( track => {
                             setTimeout(()=>{
-                                this.drawLine(previousPosition, track.position)
+                                this.drawLine(previousPosition, track.position, track.color)
                                 previousPosition = track.position
                             }, track.time)
                         })
                     })
                 } else console.log('没有进行录制')
             })
-        },
-        updateCanvasColor(color) {
-            this.canvas.strokeStyle = color
+            this.addListener()
         },
         addListener() {
             this.listenCanvasOnmousedown()
@@ -90,56 +119,53 @@
             this.listenCanvasOnmouseup()
         },
         listenCanvasOnmousedown() {
-            canvas.onmousedown = e => {
-                if (this.model.data.drawingBoardData.pointer == 'eraser') {
-                    this.model.data.using = false
-                    this.model.data.usingEraser = true
-                }else {
-                    this.model.data.using = true
-                    this.model.data.usingEraser = false
-                    let position = this.model.convertPosition(canvas.getClientRects()[0],{x: e.clientX, y: e.clientY})
-                    this.model.setPosition(position)
-                }
+            this.getCanvasElement().onmousedown = e => {
+                this.model.setStrokeState(true)
+                const position = this.model.convertPosition(this.getCanvasElement().getClientRects()[0],{x: e.clientX, y: e.clientY})
+                this.model.setPosition(position)
             }
         },
         listenCanvasOnmousemove() {
-            canvas.onmousemove = e => {
-                let newPosition = {
-                    x: e.clientX,
-                    y: e.clientY
-                }
-                newPosition = this.model.convertPosition(canvas.getClientRects()[0], newPosition)
-                if (this.model.data.using){
-                    this.drawLine(this.model.data.position, newPosition)
-                    this.model.setPosition(newPosition)
-                    if (this.model.data.recordState) {
-                        const trackData = {
-                            time: new Date().getTime() - this.model.data.recordStartTime,
-                            position: this.model.getPosition()
+            this.getCanvasElement().onmousemove = e => {
+                const position = { x: e.clientX, y: e.clientY }
+                const newPosition = this.model.convertPosition(this.getCanvasElement().getClientRects()[0], position)
+                if (this.model.getStrokeState()) {
+                    if (this.model.getDrawingBoardData().pointer === 'pen') {
+                        this.drawLine(this.model.getPosition(), newPosition, this.model.getDrawingBoardData().color)
+                        this.model.setPosition(newPosition)
+                        if (this.model.getRecordState()) {
+                            const strokeData = {
+                                time: new Date().getTime() - this.model.getRecordStartTime(),
+                                position: this.model.getPosition(),
+                                color: this.model.getDrawingBoardData().color
+                            }
+                            this.model.getStroke().push(strokeData)
                         }
-                        this.model.data.stroke.push(trackData)
                     }
-                }
-                if (this.model.data.usingEraser){
-                    this.canvas.clearRect(newPosition.x, newPosition.y, 15, 15)
+                    if (this.model.getDrawingBoardData().pointer === 'eraser') {
+                        this.useEraser(newPosition, 15)
+                    }
                 }
             }
         },
         listenCanvasOnmouseup() {
-            canvas.onmouseup = e => {
-                this.model.data.using = false
-                this.model.data.usingEraser = false
-                if (this.model.data.recordState){
-                    this.model.data.recordData.track.push(this.model.data.stroke)
-                    this.model.data.stroke = []
+            this.getCanvasElement().onmouseup = e => {
+                this.model.setStrokeState(false)
+                if (this.model.getRecordState()){
+                    this.model.data.recordData.track.push(this.model.data.stroke) //数据结构优化
+                    this.model.setStroke([])
                 }
             }
         },
-        initCanvas() {
-            canvas.width = '500'
-            canvas.height = '624'
-            canvas.style.backgroundImage = `url("./img/1.JPG")`
-            canvas.style.backgroundSize = 'contain'
+        useEraser(position, radius) {
+            this.canvasContext.clearRect(position.x, position.y, radius, radius)
+        },
+        getCanvasContext(width, height, backgroundUrl) {
+            const canvas = this.getCanvasElement()
+            canvas.width = width
+            canvas.height = height
+            canvas.style.backgroundImage = backgroundUrl
+            console.log(canvas.style.height)
             return canvas.getContext('2d')
         },
         createStickerAndBindEvent(html, selector) {
@@ -196,14 +222,18 @@
                 }
             }
         },
-        drawLine(start,end){
-            this.canvas.beginPath()
-            this.canvas.moveTo(start.x,start.y)
-            this.canvas.lineTo(end.x,end.y)
-            this.canvas.lineWidth = 3
-            this.canvas.stroke()
-            this.canvas.closePath()
-        }
+        drawLine(start, end, color){
+            this.canvasContext.strokeStyle = color
+            this.canvasContext.beginPath()
+            this.canvasContext.moveTo(start.x, start.y)
+            this.canvasContext.lineTo(end.x, end.y)
+            this.canvasContext.lineWidth = 3
+            this.canvasContext.stroke()
+            this.canvasContext.closePath()
+        },
+        getCanvasElement() {
+            return document.querySelector('#canvas')
+        },
     }
     controller.init(view,model)
 }
