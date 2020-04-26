@@ -5,7 +5,7 @@
             <button id = "recordButton">开始录制</button>
             <button id = "pauseButton">暂停录制</button>
             <button id = "finishButton">完成录制</button>
-            <button id = "re-recordButton">完成录制</button>
+            <button id = "re-recordButton">重新录制</button>
             <button id = "clearButton">清屏</button>
             <button id = "playButton">播放</button>
         `,
