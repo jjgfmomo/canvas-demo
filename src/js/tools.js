@@ -32,6 +32,9 @@
             },
             pointerLists: ['pen', 'eraser'],
             colorLists: ['black', 'blue', 'red', 'yellow']
+        },
+        setCurrentData(key,value){
+            this.data.currentData[key] = value
         }
     }
     let controller = {
@@ -39,14 +42,14 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.updatedCurrentDataByLists(this.model.data.pointerLists, 'pointer')
-            this.updatedCurrentDataByLists(this.model.data.colorLists, 'color')
+            this.bindOnclickByLists(this.model.data.pointerLists, 'pointer')
+            this.bindOnclickByLists(this.model.data.colorLists, 'color')
             window.eventHub.emit('updatedCanvasSetting', this.model.data.currentData)
         },
-        updatedCurrentDataByLists(lists, type) {
+        bindOnclickByLists(lists, type) {
             lists.map(item => {
                 document.querySelector('.' + item).onclick = e => {
-                    this.model.data.currentData[type] = item
+                    this.model.setCurrentData(type, item)
                     this.init(this.view, this.model)
                 }
             })

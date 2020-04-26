@@ -69,7 +69,7 @@
                 e.preventDefault()
                 window.eventHub.emit('createStickerAndBindEvent', {
                     html:  `<video src="./img/vvv.mp4"  id="video111"  autoplay muted width="100px" height="180px"></video>`,
-                    selector: '#video-container'
+                    selector: '#canvas-wrapper'
                 })
             }
         },

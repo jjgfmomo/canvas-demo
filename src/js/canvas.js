@@ -2,26 +2,24 @@
     let view = {
         el: '#canvas-wrapper',
         template: `
-           <div id="video-container">
-               <canvas id="canvas"></canvas>
-           </div>
+            <canvas id="canvas"></canvas>
         `,
         render(data){
-            let html = this.template
-            document.querySelector(this.el).innerHTML = html
+            document.querySelector(this.el).innerHTML =  this.template
         },
     }
     let model = {
         data: {
-            drawingBoardData: null,
-
+            drawingBoardData: null, //画板数据
+            stroke: [], //当前笔画
             position: {
                 x: undefined,
                 y: undefined
             },
-            stroke: [], //当前笔画
+
             using: false,
             usingEraser: false,
+
             recordState: false,
             recordData: {},
             recordStartTime: '',
@@ -49,12 +47,12 @@
             this.view.render(this.model.data)
             this.addListener()
             this.canvas = this.initCanvas()
-            window.eventHub.on('updatedCanvasSetting', e => {
-                this.model.data.drawingBoardData = e
-                this.updateCanvasColor(e.color)
+            window.eventHub.on('updatedCanvasSetting', data => {
+                this.model.data.drawingBoardData = data
+                this.updateCanvasColor(data.color)
             })
-            window.eventHub.on('createStickerAndBindEvent', e => {
-                this.createStickerAndBindEvent(e.html, e.selector)
+            window.eventHub.on('createStickerAndBindEvent', data => {
+                this.createStickerAndBindEvent(data.html, data.selector)
             })
             window.eventHub.on('switchRecordState',() => {
                 this.model.switchRecordState()
@@ -91,7 +89,6 @@
             this.listenCanvasOnmousemove()
             this.listenCanvasOnmouseup()
         },
-
         listenCanvasOnmousedown() {
             canvas.onmousedown = e => {
                 if (this.model.data.drawingBoardData.pointer == 'eraser') {

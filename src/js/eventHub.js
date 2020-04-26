@@ -1,3 +1,4 @@
+//全局事件委托中心
 window.eventHub = {
     events:{
     },
