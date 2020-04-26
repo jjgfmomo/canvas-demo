@@ -35,6 +35,9 @@
         },
         setCurrentData(key,value){
             this.data.currentData[key] = value
+        },
+        getCurrentData() {
+            return this.data.currentData
         }
     }
     let controller = {
@@ -44,7 +47,7 @@
             this.view.render(this.model.data)
             this.bindOnclickByLists(this.model.data.pointerLists, 'pointer')
             this.bindOnclickByLists(this.model.data.colorLists, 'color')
-            window.eventHub.emit('updatedCanvasSetting', this.model.data.currentData)
+            window.eventHub.emit('updateDrawingBoardData', this.model.getCurrentData())
         },
         bindOnclickByLists(lists, type) {
             lists.map(item => {
