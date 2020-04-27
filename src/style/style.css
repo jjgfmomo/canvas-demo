@@ -22,7 +22,7 @@ footer #operations button{border-radius: 20px;background-color: dodgerblue;paddi
     position: relative;
     right: -10px;
 }
-.stickers-show{
+.stickers-unshow{
     display: none;
 }
 #video-container{
@@ -38,4 +38,13 @@ footer #operations button{border-radius: 20px;background-color: dodgerblue;paddi
     text-align: center;
     background-color: black;
     color: white;
+}
+.stickers-image{
+    width: 60px;
+    height: 60px;
+}
+.stickers-video{
+    width: 60px;
+    height: 60px;
+    line-height: 60px;text-align: center;font-size: 35px;background-color: hotpink;
 }

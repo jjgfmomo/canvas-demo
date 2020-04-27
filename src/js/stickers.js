@@ -3,38 +3,85 @@
         el: '#stickers',
         template: `
             <div class="stickers-navigation">
-                <div class="navigation-item" id="static">静态图</div>
-                <div class="navigation-item" id="dynamic">动态图</div>
-                <div class="navigation-item" id="strokes">笔画图</div>
-                <div class="navigation-item" id="video">视频</div>
+                __navTitle__ 
             </div>
-            <div class="static stickers-show">
-                <img id="star" src="./img/heart.png" alt="" width="60px" height="60px">
-                <img id="star1" src="./img/star.png" alt="" width="60px" height="60px">
-            </div>
-            <div class="dynamic stickers-show">
-                <img id="star1" src="./img/2.gif" alt="" width="60px" height="60px">
-            </div>
-            <div class="strokes stickers-show">
-                <img id="star" src="./img/heart.png" alt="" width="60px" height="60px">
-                <img id="star1" src="./img/2.gif" alt="" width="60px" height="60px">
-                <img id="star1" src="./img/star.png" alt="" width="60px" height="60px">
-            </div>
-            <div class="video stickers-show">
-                <div class="videoTest" style="width:60px;height=60px;line-height: 60px;text-align: center;font-size: 35px;background-color: hotpink;">话</div>
-            </div>
-`,
+            __navContent__
+        `,
+        navTitleTemplate: `
+            <div class="navigation-item" id="__navId__">__navName__</div>
+        `,
+        navContentTemplate: `
+            <div class="__navId__ stickers-unshow">__contentItem__</div>
+        `,
+        imageTemplate: `
+            <img id="__itemId__" src="__itemUrl__" class="stickers-image">
+        `,
+        videoTemplate: `
+            <div class="stickers-video" id="__itemId__" >__itemId__</div>
+        `,
         render(data) {
             let html =  this.template
-            html = html.replace(data.currentNav + ' stickers-show', data.currentNav)
+            let navTitle = ''
+            let navContent = ''
+            data.stickerData.map(item => {
+                let newTitle = this.navTitleTemplate.replace('__navId__', item.navId).replace('__navName__', item.navName)
+                navTitle += newTitle
+                let newContentItem = ''
+                item.list.map( listItem => {
+                    if (item.type === 'image') newContentItem += this.imageTemplate.replace('__itemId__', listItem.id).replace('__itemUrl__', listItem.url)
+                    if (item.type === 'video') newContentItem += this.videoTemplate.split('__itemId__').join(listItem.id)
+                })
+                navContent += this.navContentTemplate.replace('__navId__', item.navId).replace('__contentItem__', newContentItem)
+            })
+            html = html.replace('__navTitle__', navTitle).replace('__navContent__', navContent).replace(data.currentNav + ' stickers-unshow', data.currentNav)
             document.querySelector(this.el).innerHTML = html
         }
     }
     let model = {
         data: {
-            navLists: ['static', 'dynamic', 'strokes', 'video'],
             currentNav: 'static',
-            videoLists: '/vvv.mp4'
+            stickerData: [
+                {
+                    navName: '静态图',
+                    navId: 'static',
+                    type: 'image',
+                    list: [
+                        {
+                            id: 'heart',
+                            url: './img/heart.png',
+                        },
+                        {
+                            id: 'star',
+                            url: './img/star.png',
+                        }
+                    ]
+                },
+                {
+                    navName: '动态图',
+                    navId: 'dynamic',
+                    type: 'image',
+                    list: [
+                        {
+                            id: 'starD',
+                            url: './img/star.gif',
+                        }
+                    ]
+                },
+                {
+                    navName: '视频',
+                    navId: 'video',
+                    type: 'video',
+                    list: [
+                        {
+                            id: '话',
+                            url: './img/话.mp4',
+                        }
+                    ]
+                }
+            ]
+        },
+        setCurrentNav(value) {
+            this.data.currentNav = value
         }
     }
     let controller = {
@@ -42,9 +89,26 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.imageTest()
             this.listenNavSelect()
-            this.videoTest()
+        },
+        listenNavSelect(){
+            this.model.data.stickerData.map( item => {
+                document.querySelector('#' + item.navId).onclick = e => {
+                    this.model.setCurrentNav(item.navId)
+                    this.init(this.view,this.model)
+                }
+                item.list.map(listItem => {
+                    let html
+                    if (item.type === 'image') html = `<img src=${listItem.url} width="60px" height="60px">`
+                    if (item.type === 'video') html = `<video src=${listItem.url} autoplay muted width="100px" height="180px"></video>`
+                    document.querySelector('#' + listItem.id).onclick = e =>{
+                        window.eventHub.emit('createStickerAndBindEvent', {
+                            html:  html,
+                            selector: '#canvas-wrapper'
+                        })
+                    }
+                })
+            })
         },
         imageTest() {
             const star = document.querySelector('#star')
@@ -55,20 +119,12 @@
                 })
             }
         },
-        listenNavSelect(){
-            this.model.data.navLists.map( nav => {
-                document.querySelector('#' + nav).onclick = e => {
-                    this.model.data.currentNav = nav
-                    this.init(this.view,this.model)
-                }
-            })
-        },
         videoTest(){
             const videoTest = document.querySelector('.videoTest')
             videoTest.onclick = e => {
                 e.preventDefault()
                 window.eventHub.emit('createStickerAndBindEvent', {
-                    html:  `<video src="./img/vvv.mp4"  id="video111"  autoplay muted width="100px" height="180px"></video>`,
+                    html:  `<video src="./img/话.mp4"  id="video111"  autoplay muted width="100px" height="180px"></video>`,
                     selector: '#canvas-wrapper'
                 })
             }
