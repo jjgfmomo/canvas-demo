@@ -80,9 +80,7 @@
                 }
             ]
         },
-        setCurrentNav(value) {
-            this.data.currentNav = value
-        }
+        setCurrentNav(value) { this.data.currentNav = value }
     }
     let controller = {
         init(view, model) {
@@ -91,18 +89,20 @@
             this.view.render(this.model.data)
             this.addListener()
         },
-        addListener(){
+        addListener() {
             this.model.data.stickerData.map( item => {
-                this.listenTabChange(item)
+                this.listenTabOnclick(item)
                 this.listenTabContentItemOnclick(item)
             })
         },
-        listenTabChange(item) {
+        // 监听 Tab 点击 => 触发改变 TabContent
+        listenTabOnclick(item) {
             document.querySelector('#' + item.navId).onclick = e => {
                 this.model.setCurrentNav(item.navId)
                 this.init(this.view,this.model)
             }
         },
+        // 监听 TabContentItem 点击 => 触发在画板中添加元素
         listenTabContentItemOnclick(item){
             item.list.map(listItem => {
                 let html
