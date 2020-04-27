@@ -22,7 +22,7 @@ footer {display: flex;flex-direction: row;height: 15vh;align-items: center;paddi
 footer #steps {width: 200px;height: 100px;border-radius: 30px;background-color: deepskyblue;font-size: 40px;line-height: 100px;text-align: center;}
 footer #operations {width: 1500px;display: flex;flex-direction: row;justify-content: center ;flex: 1;}
 footer #operations button {border-radius: 20px;background-color: dodgerblue;padding: 20px;margin: 30px;}
-.v{
+.placeButton {
     width: 10px;
     height: 10px;
     position: absolute;
@@ -32,4 +32,11 @@ footer #operations button {border-radius: 20px;background-color: dodgerblue;padd
     text-align: center;
     background-color: black;
     color: white;
+}
+.unplaced {
+    border: 3px dotted black;
+}
+.stickers-item{
+    z-index: 10;
+    position: absolute;left: 0px;top: 0px;
 }

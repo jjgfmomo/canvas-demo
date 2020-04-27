@@ -109,10 +109,7 @@
                 if (item.type === 'image') html = `<img src=${listItem.url} width="60px" height="60px">`
                 if (item.type === 'video') html = `<video src=${listItem.url} autoplay muted width="100px" height="180px"></video>`
                 document.querySelector('#' + listItem.id).onclick = e =>{
-                    window.eventHub.emit('createStickerAndBindEvent', {
-                        html:  html,
-                        selector: '#canvas-wrapper'
-                    })
+                    window.eventHub.emit('createStickerAndBindEvent',  html)
                 }
             })
         }

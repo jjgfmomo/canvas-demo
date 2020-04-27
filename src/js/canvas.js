@@ -30,7 +30,7 @@
         getDrawingBoardData() { return this.data.drawingBoardData },
         setRecordPauseTime(time) { this.data.recordPauseTime = time },
         getRecordPauseTime() { return this.data.recordPauseTime },
-        setRecordData(tracks, strikes) { this.data.recordData  = { tracks: tracks, strikes: strikes } },
+        setRecordData(key, value) { this.data.recordData[key] = value },
         getRecordData() { return this.data.recordData },
         setStroke(data) { this.data.stroke = data },
         getStroke() { return this.data.stroke },
@@ -46,14 +46,8 @@
             this.data.stroke = []
             this.data.strokeState = false
             this.data.recordState = false
-            this.data.recordData = {
-                tracks: [],
-                strikes: []
-            }
-            this.data.position = {
-                x: null,
-                y: null
-            }
+            this.data.recordData = { tracks: [], strikes: [] }
+            this.data.position = { x: null, y: null }
         }
     }
     let controller = {
@@ -68,21 +62,19 @@
             window.eventHub.on('updateDrawingBoardData', data => {
                 this.model.setDrawingBoardData(data)
             })
-            window.eventHub.on('createStickerAndBindEvent', data => {
-                this.createStickerAndBindEvent(data.html, data.selector)
-            })
+            // 切换录制状态 || 开始录制，暂停录制
             window.eventHub.on('switchRecordState',() => {
-                if (!this.model.getRecordState()){
-                    this.startRecord()
-                }else {
-                    this.pauseRecord()
-                }
+                if (!this.model.getRecordState()) this.startRecord()
+                else this.pauseRecord()
             })
+            // 画板清屏
             window.eventHub.on('clearCanvas', () => {
                 const canvas = this.getCanvasElement()
                 this.canvasContext.clearRect(0, 0, canvas.width, canvas.height)
             })
+            // 播放录制数据
             window.eventHub.on('play', () => {
+                console.log(this.model.getRecordData())
                 if (!this.model.getRecordState()) {
                     window.eventHub.emit('clearCanvas')
                     let tracks = this.model.getRecordData().tracks
@@ -99,6 +91,7 @@
                     } else alert('没有进行录制')
                 }else alert('请先结束录制')
             })
+            // 结束录制
             window.eventHub.on('finishRecord', () => {
                 if (this.model.getRecordPauseTime() || this.model.getRecordState()) {
                     document.querySelector('#recordButton').innerHTML = '开始录制'
@@ -108,14 +101,19 @@
                     alert('录制完成')
                 }else alert('您没有开始录制')
             })
+            // 重新录制
             window.eventHub.on('re-record', () => {
                 window.eventHub.emit('clearCanvas')
                 this.model.setRecordState(false)
                 document.querySelector('#recordButton').innerHTML = '开始录制'
-                this.model.setRecordData([], [])
+                this.model.setRecordData('tracks', [])
+                this.model.setRecordData('strikes', [])
                 this.model.setRecordPauseTime(null)
             })
-            this.addListener()
+            //
+            window.eventHub.on('createStickerAndBindEvent', html => {
+                this.createStickerAndBindEvent(html)
+            })
         },
         addListener() {
             this.listenCanvasOnmousedown()
@@ -135,9 +133,9 @@
             document.querySelector('html').onmousemove = e => {
                 e.preventDefault()
                 // 判断鼠标坐标超出范围
-                if (e.x < canvasRect.x || e.x > canvasRect.x + canvasRect.width || e.y < canvasRect.y || e.y > canvasRect.y + canvasRect.height) {
+                if (e.x < canvasRect.x || e.x > canvasRect.x + canvasRect.width || e.y < canvasRect.y || e.y > canvasRect.y + canvasRect.height)
                     this.model.setStrokeState(false)
-                }else {
+                else {
                     const position = { x: e.clientX, y: e.clientY }
                     const newPosition = this.model.convertPosition(canvasRect, position)
                     // 判断当前是否在画
@@ -161,7 +159,7 @@
                         // 画板为 eraser 模式
                         if (this.model.getDrawingBoardData().pointer === 'eraser') {
                             // 擦除
-                            this.useEraser(newPosition, 15)
+                            this.eraseReact(newPosition, 15)
                         }
                     }
                 }
@@ -171,85 +169,78 @@
             this.getCanvasElement().onmouseup = e => {
                 this.model.setStrokeState(false)
                 if (this.model.getRecordState()){
-                    this.model.data.recordData.tracks.push(this.model.data.stroke) // 数据结构优化
+                    let tracks =  this.model.getRecordData().tracks
+                    tracks.push(this.model.getStroke())
+                    this.model.setRecordData('tracks',tracks)
                     this.model.setStroke([])
                 }
             }
         },
-        useEraser(position, radius) {
-            this.canvasContext.clearRect(position.x, position.y, radius, radius)
-        },
-        getCanvasContext(width, height, backgroundUrl) {
-            const canvas = this.getCanvasElement()
-            canvas.width = width
-            canvas.height = height
-            canvas.style.backgroundImage = backgroundUrl
-            return canvas.getContext('2d')
-        },
-        createStickerAndBindEvent(html, selector) {
-            let wrapperElement = document.querySelector(selector)
-            let posDiv = document.createElement('div')
-            posDiv.insertAdjacentHTML('beforeend', html)
-            posDiv.style.position = 'absolute'
-            posDiv.style.left = '0px'
-            posDiv.style.top = '0px'
-            posDiv.style.border = '3px dotted black'
-            posDiv.setAttribute('class', 'pos')
-            let v = document.createElement('div')
-            v.setAttribute('class','v')
-            v.innerHTML = 'V'
-            posDiv.append(v)
-            wrapperElement.appendChild(posDiv)
-            let newElement = posDiv
+        createStickerAndBindEvent(html) {
+            let canvasWrapper = document.querySelector('#canvas-wrapper')
+
+            let stickerItem = document.createElement('div')
+            stickerItem.insertAdjacentHTML('beforeend', html)
+            stickerItem.setAttribute('class', 'stickers-item unplaced')
+
+            let placeButton = document.createElement('div')
+            placeButton.setAttribute('class', 'placeButton')
+            placeButton.innerText = 'V'
+
+            stickerItem.append(placeButton)
+            canvasWrapper.append(stickerItem)
+
             let pointerX,  pointerY
             let state = false
-            v.onclick = e => {
+            placeButton.onclick = e => {
                 state = false
-                if (this.model.data.recordState){
-                    this.model.data.recordData.strikes.push({
-                        time: new Date().getTime() - this.model.data.recordStartTime,
-                        url: 'heart.png',
+                if (this.model.getRecordState()){
+                    let strikes = this.model.getRecordData()
+                    strikes.push({
+                        time: new Date().getTime() - this.model.getRecordStartTime(),
+                        url: '',
+                        type: '',
                         position: {
-                            x: posDiv.offsetLeft,
-                            y: posDiv.offsetTop
+                            x: stickerItem.offsetLeft,
+                            y: stickerItem.offsetTop
                         }
                     })
+                    this.model.setRecordData('strikes', strikes)
+                    this.model.data.recordData.strikes.push()
                 }
-                v.remove()
-                posDiv.style.border = 'none'
-                posDiv.onmousedown = ev => {}
+                placeButton.remove()
+                stickerItem.classList.remove('unplaced')
+                stickerItem.onmousedown = e => {}
             }
-            newElement.onmousedown = e => {
+            stickerItem.onmousedown = e => {
                 state = true
+                console.log(1)
                 pointerX = e.clientX
                 pointerY = e.clientY
-                newElement.onmouseup = e => {
-                    state = false
-                }
-                wrapperElement.onmousemove = e => {
-                    e.preventDefault()
-                    if (state){
-                        let dX =  e.clientX - pointerX
-                        let dY =  e.clientY - pointerY
-                        newElement.style.left = newElement.offsetLeft + dX + 'px'
-                        newElement.style.top = newElement.offsetTop + dY + 'px'
-                        pointerX = e.clientX
-                        pointerY = e.clientY
+                document.querySelector('body').onmousemove = e => {
+                    if ( stickerItem.offsetLeft < 0 || stickerItem.offsetTop < 0 || (stickerItem.offsetLeft + stickerItem.offsetWidth) > canvasWrapper.clientWidth || (stickerItem.offsetTop + stickerItem.offsetWidth) > canvasWrapper.clientHeight ) {
+                        state = false
+                        if (stickerItem.offsetTop < 0) stickerItem.style.top = '0px'
+                        if (stickerItem.offsetLeft < 0) stickerItem.style.left = '0px'
+                        if (stickerItem.offsetLeft > canvasWrapper.clientWidth - stickerItem.offsetWidth) stickerItem.style.left = canvasWrapper.clientWidth - stickerItem.offsetWidth + 'px'
+                        if (stickerItem.offsetTop  > canvasWrapper.clientHeight - stickerItem.offsetHeight) stickerItem.style.top = canvasWrapper.clientHeight - stickerItem.offsetHeight + 'px'
+                    }
+                    else {
+                        e.preventDefault()
+                        if (state){
+                            let dX =  e.clientX - pointerX
+                            let dY =  e.clientY - pointerY
+                            stickerItem.style.left =  stickerItem.offsetLeft + dX + 'px'
+                            stickerItem.style.top =  stickerItem.offsetTop + dY + 'px'
+                            pointerX = e.clientX
+                            pointerY = e.clientY
+                        }
                     }
                 }
             }
-        },
-        drawLine(start, end, color){
-            this.canvasContext.strokeStyle = color
-            this.canvasContext.beginPath()
-            this.canvasContext.moveTo(start.x, start.y)
-            this.canvasContext.lineTo(end.x, end.y)
-            this.canvasContext.lineWidth = 3
-            this.canvasContext.stroke()
-            this.canvasContext.closePath()
-        },
-        getCanvasElement() {
-            return document.querySelector('#canvas')
+            stickerItem.onmouseup = e => {
+                state = false
+            }
         },
         startRecord() {
             this.model.setRecordState(true)
@@ -264,6 +255,28 @@
             this.model.setRecordState(false)
             document.querySelector('#recordButton').innerHTML = '开始录制'
             this.model.setRecordPauseTime(new Date().getTime())
+        },
+        drawLine(start, end, color){
+            this.canvasContext.strokeStyle = color
+            this.canvasContext.beginPath()
+            this.canvasContext.moveTo(start.x, start.y)
+            this.canvasContext.lineTo(end.x, end.y)
+            this.canvasContext.lineWidth = 3
+            this.canvasContext.stroke()
+            this.canvasContext.closePath()
+        },
+        eraseReact(position, radius) {
+            this.canvasContext.clearRect(position.x, position.y, radius, radius)
+        },
+        getCanvasElement() {
+            return document.querySelector('#canvas')
+        },
+        getCanvasContext(width, height, backgroundUrl) {
+            const canvas = this.getCanvasElement()
+            canvas.width = width
+            canvas.height = height
+            canvas.style.backgroundImage = backgroundUrl
+            return canvas.getContext('2d')
         }
     }
     controller.init(view,model)
