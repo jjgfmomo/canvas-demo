@@ -39,8 +39,8 @@
     }
     let model = {
         data: {
-            currentNav: 'static',
-            stickerData: [
+            currentNav: 'static',           // 当前 nav
+            stickerData: [                  // 贴图数据
                 {
                     navName: '静态图',
                     navId: 'static',
