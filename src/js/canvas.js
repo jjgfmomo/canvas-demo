@@ -10,77 +10,50 @@
     }
     let model = {
         data: {
-            drawingBoardData: null,                     // 画板数据
-            stroke: [],                                 // 当前笔画
-
-            position: { x: undefined, y: undefined },   // 当前position
-            strokeState: false,                         // 画板状态
-            recordState: false,                         // 录制状态
-            recordData: {},                             // 录制数据
-            recordStartTime: null,                        // 录制开始时间
-            recordPauseTime: null,
+            drawingBoardData: null,                   // 画板数据
+            stroke: null,                             // 当前笔画
+            position: null,                           // 当前 position
+            strokeState: null,                        // 画板状态
+            recordState: null,                        // 录制状态 || true：正在录制， false：暂停录制
+            recordData: null,                         // 录制数据 || recordData.tracks 存储绘制数据，recordData.strikes 存储贴图数据
+            recordStartTime: null,                    // 录制开始时间
+            recordPauseTime: null,                    // 最近的一次暂停录制时间
         },
-        setRecordPauseTime(time) {
-            this.data.recordPauseTime = time
-        },
-        getRecordPauseTime() {
-            return this.data.recordPauseTime
-        },
-        setRecordData(tracks, strikes) {
-            this.data.recordData.tracks = tracks
-            this.data.recordData.strikes = strikes
-        },
-        getRecordData() {
-            return this.data.recordData
-        },
+        // 计算鼠标坐标与 canvas 之间的距离
         convertPosition(canvasRect, position) {
             return {
                 x: position.x - canvasRect.x,
                 y: position.y - canvasRect.y
             }
         },
-        setStroke(data) {
-            this.data.stroke = data
-        },
-        getStroke() {
-            return this.data.stroke
-        },
-        setRecordStartTime(time) {
-            this.data.recordStartTime = time
-        },
-        getRecordStartTime() {
-            return this.data.recordStartTime
-        },
-        setDrawingBoardData(data) {
-            this.data.drawingBoardData = data
-        },
-        getDrawingBoardData() {
-          return this.data.drawingBoardData
-        },
-        setStrokeState(state) {
-            this.data.strokeState = state
-        },
-        getStrokeState() {
-            return this.data.strokeState
-        },
-        setRecordState(state) {
-            this.data.recordState = state
-        },
-        getRecordState(state) {
-            return this.data.recordState
-        },
-        setPosition(position) {
-            this.data.position = position
-        },
-        getPosition() {
-            return this.data.position
-        },
-        setRecordState(state) {
-            this.data.recordState = state
-        },
+        setDrawingBoardData(data) { this.data.drawingBoardData = data },
+        getDrawingBoardData() { return this.data.drawingBoardData },
+        setRecordPauseTime(time) { this.data.recordPauseTime = time },
+        getRecordPauseTime() { return this.data.recordPauseTime },
+        setRecordData(tracks, strikes) { this.data.recordData  = { tracks: tracks, strikes: strikes } },
+        getRecordData() { return this.data.recordData },
+        setStroke(data) { this.data.stroke = data },
+        getStroke() { return this.data.stroke },
+        setRecordStartTime(time) { this.data.recordStartTime = time },
+        getRecordStartTime() { return this.data.recordStartTime },
+        setStrokeState(state) { this.data.strokeState = state },
+        getStrokeState() { return this.data.strokeState },
+        setRecordState(state) { this.data.recordState = state },
+        getRecordState() { return this.data.recordState },
+        setPosition(position) { this.data.position = position },
+        getPosition() { return this.data.position },
         init() {
-            this.data.recordData.tracks = []
-            this.data.recordData.strikes = []
+            this.data.stroke = []
+            this.data.strokeState = false
+            this.data.recordState = false
+            this.data.recordData = {
+                tracks: [],
+                strikes: []
+            }
+            this.data.position = {
+                x: null,
+                y: null
+            }
         }
     }
     let controller = {

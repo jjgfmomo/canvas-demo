@@ -29,7 +29,7 @@
             this.listenElementAndEmitEvent('#playButton', 'play')
             this.listenElementAndEmitEvent('#re-recordButton', 're-record')
         },
-
+        // 监听 selector 元素点击事件 => 触发 event 事件
         listenElementAndEmitEvent(selector, event) {
             document.querySelector(selector).onclick = e => {
                 window.eventHub.emit(event)
