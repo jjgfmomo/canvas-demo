@@ -89,47 +89,33 @@
             this.view = view
             this.model = model
             this.view.render(this.model.data)
-            this.listenNavSelect()
+            this.addListener()
         },
-        listenNavSelect(){
+        addListener(){
             this.model.data.stickerData.map( item => {
-                document.querySelector('#' + item.navId).onclick = e => {
-                    this.model.setCurrentNav(item.navId)
-                    this.init(this.view,this.model)
-                }
-                item.list.map(listItem => {
-                    let html
-                    if (item.type === 'image') html = `<img src=${listItem.url} width="60px" height="60px">`
-                    if (item.type === 'video') html = `<video src=${listItem.url} autoplay muted width="100px" height="180px"></video>`
-                    document.querySelector('#' + listItem.id).onclick = e =>{
-                        window.eventHub.emit('createStickerAndBindEvent', {
-                            html:  html,
-                            selector: '#canvas-wrapper'
-                        })
-                    }
-                })
+                this.listenTabChange(item)
+                this.listenTabContentItemOnclick(item)
             })
         },
-        imageTest() {
-            const star = document.querySelector('#star')
-            star.onclick = e => {
-                window.eventHub.emit('createStickerAndBindEvent', {
-                    html:  ` <img src="./img/heart.png" alt="" width="60px" height="60px">`,
-                    selector: '#canvas-wrapper'
-                })
+        listenTabChange(item) {
+            document.querySelector('#' + item.navId).onclick = e => {
+                this.model.setCurrentNav(item.navId)
+                this.init(this.view,this.model)
             }
         },
-        videoTest(){
-            const videoTest = document.querySelector('.videoTest')
-            videoTest.onclick = e => {
-                e.preventDefault()
-                window.eventHub.emit('createStickerAndBindEvent', {
-                    html:  `<video src="./img/话.mp4"  id="video111"  autoplay muted width="100px" height="180px"></video>`,
-                    selector: '#canvas-wrapper'
-                })
-            }
-        },
-
+        listenTabContentItemOnclick(item){
+            item.list.map(listItem => {
+                let html
+                if (item.type === 'image') html = `<img src=${listItem.url} width="60px" height="60px">`
+                if (item.type === 'video') html = `<video src=${listItem.url} autoplay muted width="100px" height="180px"></video>`
+                document.querySelector('#' + listItem.id).onclick = e =>{
+                    window.eventHub.emit('createStickerAndBindEvent', {
+                        html:  html,
+                        selector: '#canvas-wrapper'
+                    })
+                }
+            })
+        }
     }
     controller.init(view,model)
 }
