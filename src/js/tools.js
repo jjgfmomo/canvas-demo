@@ -33,21 +33,20 @@
             pointerLists: ['pen', 'eraser'],
             colorLists: ['black', 'blue', 'red', 'yellow']
         },
-        setCurrentData(key,value){
-            this.data.currentData[key] = value
-        },
-        getCurrentData() {
-            return this.data.currentData
-        }
+        setCurrentData(key,value){ this.data.currentData[key] = value },
+        getCurrentData() { return this.data.currentData }
     }
     let controller = {
         init(view, model) {
             this.view = view
             this.model = model
             this.view.render(this.model.data)
+            this.addListener()
+            window.eventHub.emit('updateDrawingBoardData', this.model.getCurrentData())
+        },
+        addListener() {
             this.bindOnclickByLists(this.model.data.pointerLists, 'pointer')
             this.bindOnclickByLists(this.model.data.colorLists, 'color')
-            window.eventHub.emit('updateDrawingBoardData', this.model.getCurrentData())
         },
         bindOnclickByLists(lists, type) {
             lists.map(item => {
