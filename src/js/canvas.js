@@ -113,7 +113,7 @@
             })
             //
             window.eventHub.on('createStickerAndBindEvent', data => {
-                this.createStickerAndBindEvent(data.html, data.id)
+                this.createStickerAndBindEvent(data.html, data.id, data.url)
             })
         },
         addListener() {
@@ -187,7 +187,7 @@
                 }
             }
         },
-        createStickerAndBindEvent(html, id) {
+        createStickerAndBindEvent(html, id, url) {
             let canvasWrapper = document.querySelector('#canvas-wrapper')
 
             let stickerItem = document.createElement('div')
@@ -206,10 +206,10 @@
             placeButton.onclick = e => {
                 state = false
                 if (this.model.getRecordState()){
-                    let strikes = this.model.getRecordData()
+                    let strikes = this.model.getRecordData().strikes
                     strikes.push({
                         time: new Date().getTime() - this.model.getRecordStartTime(),
-                        url: '',
+                        url: url,
                         type: '',
                         id: id,
                         position: {
@@ -222,6 +222,7 @@
                 placeButton.remove()
                 stickerItem.classList.remove('unplaced')
                 stickerItem.onmousedown = e => {}
+
                 window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 处放置 id 为 ${id} 的贴图`)
             }
             stickerItem.onmousedown = e => {
