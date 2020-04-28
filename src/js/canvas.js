@@ -15,7 +15,7 @@
             position: null,                           // 当前 position
             strokeState: null,                        // 画板状态
             recordState: null,                        // 录制状态 || true：正在录制， false：暂停录制
-            recordData: null,                         // 录制数据 || recordData.tracks 存储绘制数据，recordData.strikes 存储贴图数据
+            recordData: null,                         // 录制数据 || recordData.tracks 存储绘制数据，recordData.stickers 存储贴图数据
             recordStartTime: null,                    // 录制开始时间
             recordPauseTime: null,                    // 最近的一次暂停录制时间
         },
@@ -46,7 +46,7 @@
             this.data.stroke = []
             this.data.strokeState = false
             this.data.recordState = false
-            this.data.recordData = { tracks: [], strikes: [] }
+            this.data.recordData = { tracks: [], stickers: [] }
             this.data.position = { x: null, y: null }
         }
     }
@@ -70,15 +70,19 @@
             window.eventHub.on('clearCanvas', () => {
                 const canvas = this.getCanvasElement()
                 this.canvasContext.clearRect(0, 0, canvas.width, canvas.height)
+                document.querySelectorAll('.stickers-item').forEach(element => {
+                    element.remove()
+                })
                 window.eventHub.emit('updatedOperationLog', '画板清屏')
             })
             // 播放录制数据
             window.eventHub.on('play', () => {
                 if (!this.model.getRecordState()) {
                     let tracks = this.model.getRecordData().tracks
-                    if (tracks.length) {
+                    let stickers = this.model.getRecordData().stickers
+                    if (tracks.length || stickers.length) {
                         window.eventHub.emit('clearCanvas')
-                        tracks.forEach(stroke => {
+                        tracks.map(stroke => {
                             let previousPosition = stroke[0].position
                             stroke.forEach( track => {
                                 setTimeout(()=>{
@@ -87,9 +91,14 @@
                                 }, track.time)
                             })
                         })
-                        window.eventHub.emit('updatedOperationLog', '播放录制')
+                        stickers.map(sticker => {
+                            setTimeout( () => {
+                                this.createSticker(sticker.html, sticker.id, sticker.position)
+                            }, sticker.time)
+                        })
+                        window.eventHub.emit('updatedOperationLog', '播放')
                     } else alert('没有进行录制')
-                }else alert('请先结束录制')
+                } else alert('请先结束录制')
             })
             // 结束录制
             window.eventHub.on('finishRecord', () => {
@@ -107,7 +116,7 @@
                 this.model.setRecordState(false)
                 document.querySelector('#recordButton').innerHTML = '开始录制'
                 this.model.setRecordData('tracks', [])
-                this.model.setRecordData('strikes', [])
+                this.model.setRecordData('stickers', [])
                 this.model.setRecordPauseTime(null)
                 window.eventHub.emit('updatedOperationLog', '重新录制')
             })
@@ -187,7 +196,21 @@
                 }
             }
         },
+        createSticker(html, id, position) {
+            let canvasWrapper = document.querySelector('#canvas-wrapper')
+
+            let stickerItem = document.createElement('div')
+            stickerItem.insertAdjacentHTML('beforeend', html)
+            stickerItem.setAttribute('class', 'stickers-item')
+            stickerItem.setAttribute('id', id)
+
+            stickerItem.style.left =  position.x + 'px'
+            stickerItem.style.top =  position.y + 'px'
+
+            canvasWrapper.append(stickerItem)
+        },
         createStickerAndBindEvent(html, id, url) {
+
             let canvasWrapper = document.querySelector('#canvas-wrapper')
 
             let stickerItem = document.createElement('div')
@@ -206,18 +229,19 @@
             placeButton.onclick = e => {
                 state = false
                 if (this.model.getRecordState()){
-                    let strikes = this.model.getRecordData().strikes
-                    strikes.push({
+                    let stickers = this.model.getRecordData().stickers
+                    stickers.push({
                         time: new Date().getTime() - this.model.getRecordStartTime(),
                         url: url,
                         type: '',
                         id: id,
+                        html: html,
                         position: {
                             x: stickerItem.offsetLeft,
                             y: stickerItem.offsetTop
                         }
                     })
-                    this.model.setRecordData('strikes', strikes)
+                    this.model.setRecordData('stickers', stickers)
                 }
                 placeButton.remove()
                 stickerItem.classList.remove('unplaced')
