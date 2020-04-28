@@ -10,6 +10,9 @@ main #tools .tools-item.red { background-color: red; }
 main #tools .tools-item.yellow { background-color: yellow; }
 main #tools .selected{ position: relative;right: -10px; }
 main #canvas-wrapper { overflow: hidden; position: relative; width: 500px; display: flex; justify-content: center; align-items: center; position: relative; }
+main #canvas-wrapper .stickers-item { z-index: 1;position: absolute;left: 0px;top: 0px; }
+main #canvas-wrapper .stickers-item.unplaced { border: 3px dotted black; }
+main #canvas-wrapper .stickers-item .placeButton { width: 10px;height: 10px;position: absolute;right: 0;top: 0;line-height: 10px;text-align: center;background-color: black;color: white; }
 main #canvas-wrapper #canvas { position: relative; background-repeat: no-repeat; background-size: contain}
 main #stickers { width: 350px; height: 600px; border: saddlebrown 1px solid;display: flex;flex-direction: column;border-radius: 15px;overflow: hidden;}
 main #stickers .stickers-image{ width: 60px;height: 60px; }
@@ -22,21 +25,5 @@ footer {display: flex;flex-direction: row;height: 15vh;align-items: center;paddi
 footer #steps {width: 200px;height: 100px;border-radius: 30px;background-color: deepskyblue;font-size: 40px;line-height: 100px;text-align: center;}
 footer #operations {width: 1500px;display: flex;flex-direction: row;justify-content: center ;flex: 1;}
 footer #operations button {border-radius: 20px;background-color: dodgerblue;padding: 20px;margin: 30px;}
-.placeButton {
-    width: 10px;
-    height: 10px;
-    position: absolute;
-    right: 0;
-    top: 0;
-    line-height: 10px;
-    text-align: center;
-    background-color: black;
-    color: white;
-}
-.unplaced {
-    border: 3px dotted black;
-}
-.stickers-item{
-    z-index: 1;
-    position: absolute;left: 0px;top: 0px;
-}
+
+
