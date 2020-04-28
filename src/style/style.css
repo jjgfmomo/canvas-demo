@@ -13,6 +13,7 @@ main #canvas-wrapper { overflow: hidden; position: relative; width: 500px; displ
 main #canvas-wrapper .stickers-item { z-index: 1; position: absolute; left: 0px; top: 0px; }
 main #canvas-wrapper .stickers-item.unplaced { border: 3px dotted black; }
 main #canvas-wrapper .stickers-item .placeButton { width: 10px; height: 10px; position: absolute; right: 0; top: 0; line-height: 10px; text-align: center; background-color: black; color: white; }
+main #canvas-wrapper .stickers-item .deleteButton { width: 10px; height: 10px; position: absolute; right: 0; bottom: 0; line-height: 10px; text-align: center; background-color: black; color: white; }
 main #canvas-wrapper #canvas { position: relative; background-repeat: no-repeat; background-size: contain}
 main #stickers { width: 350px; height: 600px; border: saddlebrown 1px solid; display: flex; flex-direction: column; border-radius: 15px; overflow: hidden; }
 main #stickers .stickers-image{ width: 60px; height: 60px; }

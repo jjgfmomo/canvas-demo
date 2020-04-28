@@ -107,10 +107,9 @@
             item.list.map(listItem => {
                 let html
                 if (item.type === 'image') html = `<img src=${listItem.url} width="60px" height="60px">`
-                if (item.type === 'video') html = `<video src=${listItem.url} autoplay muted width="100px" height="180px"></video>`
+                if (item.type === 'video') html = `<video src=${listItem.url} width="100px" height="180px" autoplay muted loop></video>`
                 document.querySelector('#' + listItem.id).onclick = e =>{
                     window.eventHub.emit('createStickerAndBindEvent',  { html: html, id: listItem.id, url: listItem.url})
-                    window.eventHub.emit('updatedOperationLog', `在画板中添加 id 为 ${listItem.id} 的 ${item.type}`)
                 }
             })
         }

@@ -210,25 +210,18 @@
             canvasWrapper.append(stickerItem)
         },
         createStickerAndBindEvent(html, id, url) {
-
             let canvasWrapper = document.querySelector('#canvas-wrapper')
-
             let stickerItem = document.createElement('div')
-            stickerItem.insertAdjacentHTML('beforeend', html)
-            stickerItem.setAttribute('class', 'stickers-item unplaced')
+            let canvasWrapperRect = canvasWrapper.getClientRects()[0]
+            canvasWrapper.onclick = e => {
+                stickerItem.insertAdjacentHTML('beforeend', html)
+                stickerItem.setAttribute('class', 'stickers-item')
+                stickerItem.style.left =  e.x - canvasWrapperRect.x + 'px'
+                stickerItem.style.top =  e.y - canvasWrapperRect.y + 'px'
+                canvasWrapper.append(stickerItem)
+                canvasWrapper.onclick = e => {}
 
-            let placeButton = document.createElement('div')
-            placeButton.setAttribute('class', 'placeButton')
-            placeButton.innerText = 'V'
-
-            stickerItem.append(placeButton)
-            canvasWrapper.append(stickerItem)
-
-            let pointerX,  pointerY
-            let state = false
-            placeButton.onclick = e => {
-                state = false
-                if (this.model.getRecordState()){
+                if (this.model.getRecordState()) {
                     let stickers = this.model.getRecordData().stickers
                     stickers.push({
                         time: new Date().getTime() - this.model.getRecordStartTime(),
@@ -243,40 +236,8 @@
                     })
                     this.model.setRecordData('stickers', stickers)
                 }
-                placeButton.remove()
-                stickerItem.classList.remove('unplaced')
-                stickerItem.onmousedown = e => {}
 
                 window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 处放置 id 为 ${id} 的贴图`)
-            }
-            stickerItem.onmousedown = e => {
-                this.model.setStrokeState(false)
-                state = true
-                pointerX = e.clientX
-                pointerY = e.clientY
-                document.querySelector('body').onmousemove = e => {
-                    if ( stickerItem.offsetLeft < 0 || stickerItem.offsetTop < 0 || (stickerItem.offsetLeft + stickerItem.offsetWidth) > canvasWrapper.clientWidth || (stickerItem.offsetTop + stickerItem.offsetWidth) > canvasWrapper.clientHeight ) {
-                        state = false
-                        if (stickerItem.offsetTop < 0) stickerItem.style.top = '0px'
-                        if (stickerItem.offsetLeft < 0) stickerItem.style.left = '0px'
-                        if (stickerItem.offsetLeft > canvasWrapper.clientWidth - stickerItem.offsetWidth) stickerItem.style.left = canvasWrapper.clientWidth - stickerItem.offsetWidth + 'px'
-                        if (stickerItem.offsetTop  > canvasWrapper.clientHeight - stickerItem.offsetHeight) stickerItem.style.top = canvasWrapper.clientHeight - stickerItem.offsetHeight + 'px'
-                    }
-                    else {
-                        e.preventDefault()
-                        if (state){
-                            let dX =  e.clientX - pointerX
-                            let dY =  e.clientY - pointerY
-                            stickerItem.style.left =  stickerItem.offsetLeft + dX + 'px'
-                            stickerItem.style.top =  stickerItem.offsetTop + dY + 'px'
-                            pointerX = e.clientX
-                            pointerY = e.clientY
-                        }
-                    }
-                }
-            }
-            stickerItem.onmouseup = e => {
-                state = false
             }
         },
         startRecord() {
