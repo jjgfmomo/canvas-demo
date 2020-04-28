@@ -80,7 +80,7 @@
                 if (!this.model.getRecordState()) {
                     let tracks = this.model.getRecordData().tracks
                     let stickers = this.model.getRecordData().stickers
-                    if (tracks.length || stickers.length) {
+                    if (this.model.getRecordData()) {
                         window.eventHub.emit('clearCanvas')
                         tracks.map(stroke => {
                             let previousPosition = stroke[0] ? stroke[0].position : null
