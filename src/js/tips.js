@@ -19,8 +19,6 @@
             })
             html = html.replace('__logData__', logData)
             document.querySelector(this.el).innerHTML = html
-            const operationLogElement = document.querySelector('#operationLog')
-            operationLogElement.scrollTop = operationLogElement.scrollHeight;
         }
     }
     let model = {
@@ -48,6 +46,8 @@
                 logData.push(log)
                 this.model.setLogData(logData)
                 this.view.render(this.model.data)
+                const operationLogElement = document.querySelector('#operationLog')
+                operationLogElement.scrollTop = operationLogElement.scrollHeight;
             })
         }
     }

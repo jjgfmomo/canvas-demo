@@ -54,7 +54,6 @@
         init(view, model) {
             this.view = view
             this.model = model
-            this.model.init()
             this.view.render(this.model.data)
             this.canvasContext = this.getCanvasContext('500', '624', 'url(./img/1.JPG)  ')
             this.addListener()
@@ -75,7 +74,6 @@
             })
             // 播放录制数据
             window.eventHub.on('play', () => {
-                console.log(this.model.getRecordData())
                 if (!this.model.getRecordState()) {
                     let tracks = this.model.getRecordData().tracks
                     if (tracks.length) {
@@ -184,7 +182,7 @@
                 if (this.model.getRecordState()){
                     let tracks =  this.model.getRecordData().tracks
                     tracks.push(this.model.getStroke())
-                    this.model.setRecordData('tracks',tracks)
+                    this.model.setRecordData('tracks', tracks)
                     this.model.setStroke([])
                 }
             }
@@ -295,5 +293,6 @@
             return canvas.getContext('2d')
         }
     }
+    model.init()
     controller.init(view,model)
 }
