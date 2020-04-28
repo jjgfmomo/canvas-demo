@@ -30,4 +30,15 @@ footer #steps {width: 200px; height: 100px; border-radius: 30px; background-colo
 footer #operations {width: 1500px; display: flex; flex-direction: row; justify-content: center ; flex: 1; }
 footer #operations button {border-radius: 20px; background-color: dodgerblue; padding: 20px; margin: 30px; }
 
-
+input{
+    height: 40px;
+    line-height: 40px;
+    background:none;
+    outline:none;
+    border:1px solid;
+    border-color: red;
+    width: 100px;
+    font-size: 16px;
+    font-weight: bold;
+    color: red;
+}
