@@ -83,7 +83,7 @@
                     if (tracks.length || stickers.length) {
                         window.eventHub.emit('clearCanvas')
                         tracks.map(stroke => {
-                            let previousPosition = stroke[0].position
+                            let previousPosition = stroke[0] ? stroke[0].position : null
                             stroke.forEach( track => {
                                 setTimeout(()=>{
                                     this.drawLine(previousPosition, track.position, track.color)
