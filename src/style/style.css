@@ -9,7 +9,7 @@ main #tools .tools-item.blue { background-color: blue; }
 main #tools .tools-item.red { background-color: red; }
 main #tools .tools-item.yellow { background-color: yellow; }
 main #tools .selected{ position: relative;right: -10px; }
-main #canvas-wrapper { position: relative; width: 500px; display: flex; justify-content: center; align-items: center; position: relative; }
+main #canvas-wrapper { overflow: hidden; position: relative; width: 500px; display: flex; justify-content: center; align-items: center; position: relative; }
 main #canvas-wrapper #canvas { position: relative; background-repeat: no-repeat; background-size: contain}
 main #stickers { width: 350px; height: 600px; border: saddlebrown 1px solid;display: flex;flex-direction: column;border-radius: 15px;overflow: hidden;}
 main #stickers .stickers-image{ width: 60px;height: 60px; }
@@ -37,6 +37,6 @@ footer #operations button {border-radius: 20px;background-color: dodgerblue;padd
     border: 3px dotted black;
 }
 .stickers-item{
-    z-index: 10;
+    z-index: 1;
     position: absolute;left: 0px;top: 0px;
 }
