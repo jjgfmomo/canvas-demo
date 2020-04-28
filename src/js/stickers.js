@@ -109,7 +109,8 @@
                 if (item.type === 'image') html = `<img src=${listItem.url} width="60px" height="60px">`
                 if (item.type === 'video') html = `<video src=${listItem.url} autoplay muted width="100px" height="180px"></video>`
                 document.querySelector('#' + listItem.id).onclick = e =>{
-                    window.eventHub.emit('createStickerAndBindEvent',  html)
+                    window.eventHub.emit('createStickerAndBindEvent',  { html: html, id: listItem.id})
+                    window.eventHub.emit('updatedOperationLog', `在画板中添加 id 为 ${listItem.id} 的 ${item.type}`)
                 }
             })
         }

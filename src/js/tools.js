@@ -53,6 +53,7 @@
                 document.querySelector('.' + item).onclick = e => {
                     this.model.setCurrentData(type, item)
                     this.init(this.view, this.model)
+                    window.eventHub.emit('updatedOperationLog', `切换 ${type} 为 ${item}`)
                 }
             })
         }

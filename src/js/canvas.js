@@ -71,14 +71,15 @@
             window.eventHub.on('clearCanvas', () => {
                 const canvas = this.getCanvasElement()
                 this.canvasContext.clearRect(0, 0, canvas.width, canvas.height)
+                window.eventHub.emit('updatedOperationLog', '画板清屏')
             })
             // 播放录制数据
             window.eventHub.on('play', () => {
                 console.log(this.model.getRecordData())
                 if (!this.model.getRecordState()) {
-                    window.eventHub.emit('clearCanvas')
                     let tracks = this.model.getRecordData().tracks
                     if (tracks.length) {
+                        window.eventHub.emit('clearCanvas')
                         tracks.forEach(stroke => {
                             let previousPosition = stroke[0].position
                             stroke.forEach( track => {
@@ -88,6 +89,7 @@
                                 }, track.time)
                             })
                         })
+                        window.eventHub.emit('updatedOperationLog', '播放录制')
                     } else alert('没有进行录制')
                 }else alert('请先结束录制')
             })
@@ -98,7 +100,7 @@
                     console.log(JSON.stringify(this.model.getRecordData()))
                     this.model.setRecordPauseTime(null)
                     this.model.setRecordState(false)
-                    alert('录制完成')
+                    window.eventHub.emit('updatedOperationLog', '录制完成')
                 }else alert('您没有开始录制')
             })
             // 重新录制
@@ -109,10 +111,11 @@
                 this.model.setRecordData('tracks', [])
                 this.model.setRecordData('strikes', [])
                 this.model.setRecordPauseTime(null)
+                window.eventHub.emit('updatedOperationLog', '重新录制')
             })
             //
-            window.eventHub.on('createStickerAndBindEvent', html => {
-                this.createStickerAndBindEvent(html)
+            window.eventHub.on('createStickerAndBindEvent', data => {
+                this.createStickerAndBindEvent(data.html, data.id)
             })
         },
         addListener() {
@@ -167,7 +170,17 @@
         },
         listenCanvasOnmouseup() {
             this.getCanvasElement().onmouseup = e => {
+                // 打印 log
+                if (this.model.getStrokeState()) {
+                    let log
+                    if (this.model.getDrawingBoardData().pointer === 'pen') log = `用 ${this.model.getDrawingBoardData().color} pen 画了一笔`
+                    if (this.model.getDrawingBoardData().pointer === 'eraser') log = `用 eraser 擦了一笔`
+                    window.eventHub.emit('updatedOperationLog', log)
+
+                }
+
                 this.model.setStrokeState(false)
+                // 记录当前笔画
                 if (this.model.getRecordState()){
                     let tracks =  this.model.getRecordData().tracks
                     tracks.push(this.model.getStroke())
@@ -176,7 +189,7 @@
                 }
             }
         },
-        createStickerAndBindEvent(html) {
+        createStickerAndBindEvent(html, id) {
             let canvasWrapper = document.querySelector('#canvas-wrapper')
 
             let stickerItem = document.createElement('div')
@@ -200,17 +213,18 @@
                         time: new Date().getTime() - this.model.getRecordStartTime(),
                         url: '',
                         type: '',
+                        id: id,
                         position: {
                             x: stickerItem.offsetLeft,
                             y: stickerItem.offsetTop
                         }
                     })
                     this.model.setRecordData('strikes', strikes)
-                    this.model.data.recordData.strikes.push()
                 }
                 placeButton.remove()
                 stickerItem.classList.remove('unplaced')
                 stickerItem.onmousedown = e => {}
+                window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 处放置 id 为 ${id} 的贴图`)
             }
             stickerItem.onmousedown = e => {
                 this.model.setStrokeState(false)
@@ -250,11 +264,13 @@
             }else {
                 this.model.setRecordStartTime(new Date().getTime())
             }
+            window.eventHub.emit('updatedOperationLog', '开始录制')
         },
         pauseRecord() {
             this.model.setRecordState(false)
             document.querySelector('#recordButton').innerHTML = '开始录制'
             this.model.setRecordPauseTime(new Date().getTime())
+            window.eventHub.emit('updatedOperationLog', '暂停录制')
         },
         drawLine(start, end, color){
             this.canvasContext.strokeStyle = color

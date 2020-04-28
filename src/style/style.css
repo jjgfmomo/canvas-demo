@@ -8,22 +8,25 @@ main #tools .tools-item.black { background-color: black; }
 main #tools .tools-item.blue { background-color: blue; }
 main #tools .tools-item.red { background-color: red; }
 main #tools .tools-item.yellow { background-color: yellow; }
-main #tools .selected{ position: relative;right: -10px; }
+main #tools .selected{ position: relative; right: -10px; }
 main #canvas-wrapper { overflow: hidden; position: relative; width: 500px; display: flex; justify-content: center; align-items: center; position: relative; }
-main #canvas-wrapper .stickers-item { z-index: 1;position: absolute;left: 0px;top: 0px; }
+main #canvas-wrapper .stickers-item { z-index: 1; position: absolute; left: 0px; top: 0px; }
 main #canvas-wrapper .stickers-item.unplaced { border: 3px dotted black; }
-main #canvas-wrapper .stickers-item .placeButton { width: 10px;height: 10px;position: absolute;right: 0;top: 0;line-height: 10px;text-align: center;background-color: black;color: white; }
+main #canvas-wrapper .stickers-item .placeButton { width: 10px; height: 10px; position: absolute; right: 0; top: 0; line-height: 10px; text-align: center; background-color: black; color: white; }
 main #canvas-wrapper #canvas { position: relative; background-repeat: no-repeat; background-size: contain}
-main #stickers { width: 350px; height: 600px; border: saddlebrown 1px solid;display: flex;flex-direction: column;border-radius: 15px;overflow: hidden;}
-main #stickers .stickers-image{ width: 60px;height: 60px; }
-main #stickers .stickers-video{ width: 60px;height: 60px;line-height: 60px;text-align: center;font-size: 35px;background-color: hotpink; }
+main #stickers { width: 350px; height: 600px; border: saddlebrown 1px solid; display: flex; flex-direction: column; border-radius: 15px; overflow: hidden; }
+main #stickers .stickers-image{ width: 60px; height: 60px; }
+main #stickers .stickers-video{ width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 35px; background-color: hotpink; }
 main #stickers .stickers-unshow{ display: none; }
-main #stickers .stickers-navigation {width: 100%;display: flex;flex-direction: row;}
-main #stickers .stickers-navigation .navigation-item {flex: 1;height: 60px;border: saddlebrown 1px solid;background-color: #bc8f8f;line-height: 60px;text-align: center;}
-main #tips { width: 300px; height: 300px; border: saddlebrown 1px solid; border-radius: 30px;}
-footer {display: flex;flex-direction: row;height: 15vh;align-items: center;padding: 20px;}
-footer #steps {width: 200px;height: 100px;border-radius: 30px;background-color: deepskyblue;font-size: 40px;line-height: 100px;text-align: center;}
-footer #operations {width: 1500px;display: flex;flex-direction: row;justify-content: center ;flex: 1;}
-footer #operations button {border-radius: 20px;background-color: dodgerblue;padding: 20px;margin: 30px;}
+main #stickers .stickers-navigation {width: 100%; display: flex; flex-direction: row; }
+main #stickers .stickers-navigation .navigation-item {flex: 1; height: 60px; border: saddlebrown 1px solid; background-color: #bc8f8f; line-height: 60px; text-align: center; }
+main #tips { width: 300px; height: 610px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+main #tips #operationLog { overflow-y: scroll; width: 300px; height: 300px; border: saddlebrown 1px solid; border-radius: 15px; text-align: center; padding: 10px; }
+main #tips #operationLog .logData { font-size: 14px; }
+main #tips #stepHint { text-align: center; width: 300px; height: 300px; border: saddlebrown 1px solid; border-radius: 15px; padding: 10px; }
+footer {display: flex; flex-direction: row; height: 15vh; align-items: center; padding: 20px; }
+footer #steps {width: 200px; height: 100px; border-radius: 30px; background-color: deepskyblue; font-size: 40px; line-height: 100px; text-align: center; }
+footer #operations {width: 1500px; display: flex; flex-direction: row; justify-content: center ; flex: 1; }
+footer #operations button {border-radius: 20px; background-color: dodgerblue; padding: 20px; margin: 30px; }
 
 
