@@ -16,6 +16,9 @@
             <svg class="icon tools-item" aria-hidden="true">
                 <use xlink:href="#icon-back"></use>
             </svg>
+            <svg class="icon tools-item" aria-hidden="true">
+                <use xlink:href="#icon-text"></use>
+            </svg>
         `,
         render(data) {
             let pointer = data.currentData.pointer
