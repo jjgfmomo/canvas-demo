@@ -26,7 +26,7 @@
             logData: null
         },
         init() {
-            this.data.logData = ['画了一笔']
+            this.data.logData = []
         },
         getLogData() {
             return this.data.logData
