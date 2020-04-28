@@ -213,8 +213,8 @@
                 stickerItem.onmousedown = e => {}
             }
             stickerItem.onmousedown = e => {
+                this.model.setStrokeState(false)
                 state = true
-                console.log(1)
                 pointerX = e.clientX
                 pointerY = e.clientY
                 document.querySelector('body').onmousemove = e => {
