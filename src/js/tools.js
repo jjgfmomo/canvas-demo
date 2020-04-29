@@ -50,37 +50,7 @@
         addListener() {
             this.bindOnclickByLists(this.model.data.pointerLists, 'pointer')
             this.bindOnclickByLists(this.model.data.colorLists, 'color')
-            document.querySelector('#insert-text').onclick = e => {
-                let canvasWrapper = document.querySelector('#canvas-wrapper')
-                let stickerItem = document.createElement('div')
-                let canvasWrapperRect = canvasWrapper.getClientRects()[0]
-                canvasWrapper.onclick = e => {
-                    stickerItem.insertAdjacentHTML('beforeend', '<input type="text"  style="BACKGROUND-COLOR: transparent;">')
-                    stickerItem.setAttribute('class', 'stickers-item')
-                    stickerItem.style.left =  e.x - canvasWrapperRect.x + 'px'
-                    stickerItem.style.top =  e.y - canvasWrapperRect.y + 'px'
-                    canvasWrapper.append(stickerItem)
-                    canvasWrapper.onclick = e => {}
-
-                    if (this.model.getRecordState()) {
-                        let stickers = this.model.getRecordData().stickers
-                        stickers.push({
-                            time: new Date().getTime() - this.model.getRecordStartTime(),
-                            url: url,
-                            type: '',
-                            id: id,
-                            html: html,
-                            position: {
-                                x: stickerItem.offsetLeft,
-                                y: stickerItem.offsetTop
-                            }
-                        })
-                        this.model.setRecordData('stickers', stickers)
-                    }
-
-                    window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 处放置 id 为 ${id} 的贴图`)
-                }
-            }
+            this.insertTextTest()
         },
         bindOnclickByLists(lists, type) {
             lists.map(item => {
@@ -89,6 +59,12 @@
                     this.init(this.view, this.model)
                     window.eventHub.emit('updatedOperationLog', `切换 ${type} 为 ${item}`)
                 }
+            })
+        },
+        insertTextTest() {
+            window.eventHub.emit('createText', {
+                html: '<input type="text"  style="background-color: transparent;">',
+                type: 'text'
             })
         }
     }

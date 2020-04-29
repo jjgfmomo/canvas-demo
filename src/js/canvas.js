@@ -124,6 +124,53 @@
             window.eventHub.on('createStickerAndBindEvent', data => {
                 this.createStickerAndBindEvent(data.html, data.id, data.url)
             })
+            window.eventHub.on('createText', data => {
+                document.querySelector('#insert-text').onclick = e => {
+                    this.model.setStrokeState(false)
+                    let canvasWrapper = document.querySelector('#canvas-wrapper')
+                    let stickerItem = document.createElement('div')
+                    let canvasWrapperRect = canvasWrapper.getClientRects()[0]
+                    canvasWrapper.onclick = e => {
+                        stickerItem.insertAdjacentHTML('beforeend', data.html)
+                        stickerItem.setAttribute('class', 'stickers-item')
+                        stickerItem.style.left =  e.x - canvasWrapperRect.x + 'px'
+                        stickerItem.style.top =  e.y - canvasWrapperRect.y + 'px'
+                        canvasWrapper.append(stickerItem)
+                        canvasWrapper.onclick = e => {}
+
+                        let textElement = stickerItem.firstChild
+                        let value= null
+
+                        textElement.focus()
+
+                        textElement.onblur = e => {
+                            value = textElement.value
+                            window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 插入 value 为 ${value} 的文本`)
+                            setTimeout(() => {
+                                this.model.setStrokeState(true)
+                            })
+                        }
+
+
+                        if (this.model.getRecordState()) {
+                            let stickers = this.model.getRecordData().stickers
+                            stickers.push({
+                                time: new Date().getTime() - this.model.getRecordStartTime(),
+                                type: data.type,
+                                html: data.html,
+                                position: {
+                                    x: stickerItem.offsetLeft,
+                                    y: stickerItem.offsetTop
+                                }
+                            })
+                            this.model.setRecordData('stickers', stickers)
+                        }
+
+
+
+                    }
+                }
+            })
         },
         addListener() {
             this.listenCanvasOnmousedown()
