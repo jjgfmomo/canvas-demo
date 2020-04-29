@@ -15,7 +15,7 @@
             position: null,                           // 当前 position
             strokeState: null,                        // 画板状态
             recordState: null,                        // 录制状态 || true：正在录制， false：暂停录制
-            recordData: null,                         // 录制数据 || recordData.tracks 存储绘制数据，recordData.stickers 存储贴图数据
+            recordData: null,                         // 录制数据
             recordStartTime: null,                    // 录制开始时间
             recordPauseTime: null,                    // 最近的一次暂停录制时间
         },
@@ -30,7 +30,7 @@
         getDrawingBoardData() { return this.data.drawingBoardData },
         setRecordPauseTime(time) { this.data.recordPauseTime = time },
         getRecordPauseTime() { return this.data.recordPauseTime },
-        setRecordData(key, value) { this.data.recordData[key] = value },
+        setRecordData(data) { this.data.recordData = data },
         getRecordData() { return this.data.recordData },
         setStroke(data) { this.data.stroke = data },
         getStroke() { return this.data.stroke },
@@ -46,7 +46,7 @@
             this.data.stroke = []
             this.data.strokeState = false
             this.data.recordState = false
-            this.data.recordData = { tracks: [], stickers: [] }
+            this.data.recordData = []
             this.data.position = { x: null, y: null }
         }
     }
@@ -78,23 +78,29 @@
             // 播放录制数据
             window.eventHub.on('play', () => {
                 if (!this.model.getRecordState()) {
-                    let tracks = this.model.getRecordData().tracks
-                    let stickers = this.model.getRecordData().stickers
-                    if (this.model.getRecordData()) {
+                    let recordData = this.model.getRecordData()
+                    if (recordData) {
                         window.eventHub.emit('clearCanvas')
-                        tracks.map(stroke => {
-                            let previousPosition = stroke[0] ? stroke[0].position : null
-                            stroke.forEach( track => {
-                                setTimeout(()=>{
-                                    this.drawLine(previousPosition, track.position, track.color)
-                                    previousPosition = track.position
-                                }, track.time)
-                            })
-                        })
-                        stickers.map(sticker => {
-                            setTimeout( () => {
-                                this.createSticker(sticker.html, sticker.id, sticker.position)
-                            }, sticker.time)
+                        console.log(recordData)
+                        recordData.map(res => {
+                            // 绘制 stroke 数据
+                            if (res.type === 'stroke') {
+                                let previousPosition = res.data[0] ? res.data[0].position : null
+                                res.data.map(stroke => {
+                                    setTimeout(() => {
+                                        this.drawLine(previousPosition, stroke.position, stroke.color)
+                                        previousPosition = stroke.position
+                                    }, stroke.time)
+                                })
+                            }
+                            // 绘制 text ||  sticker 数据
+                            if (res.type === 'text' || res.type === 'sticker') {
+                                const data = res.data
+                                setTimeout(() => {
+                                    console.log(1)
+                                    this.createSticker(data.html, data.id, data.position)
+                                }, data.time)
+                            }
                         })
                         window.eventHub.emit('updatedOperationLog', '播放')
                     } else alert('没有进行录制')
@@ -104,7 +110,7 @@
             window.eventHub.on('finishRecord', () => {
                 if (this.model.getRecordPauseTime() || this.model.getRecordState()) {
                     document.querySelector('#recordButton').innerHTML = '开始录制'
-                    console.log(JSON.stringify(this.model.getRecordData()))
+                    console.log(this.model.getRecordData())
                     this.model.setRecordPauseTime(null)
                     this.model.setRecordState(false)
                     window.eventHub.emit('updatedOperationLog', '录制完成')
@@ -115,8 +121,7 @@
                 window.eventHub.emit('clearCanvas')
                 this.model.setRecordState(false)
                 document.querySelector('#recordButton').innerHTML = '开始录制'
-                this.model.setRecordData('tracks', [])
-                this.model.setRecordData('stickers', [])
+                this.model.setRecordData([])
                 this.model.setRecordPauseTime(null)
                 window.eventHub.emit('updatedOperationLog', '重新录制')
             })
@@ -145,29 +150,24 @@
 
                         textElement.onblur = e => {
                             value = textElement.value
+                            if (this.model.getRecordState()) {
+                                let html = data.html.replace('input', `input value = ${value}`)
+                                this.model.getRecordData().push({
+                                    type: 'text',
+                                    data: {
+                                        time: new Date().getTime() - this.model.getRecordStartTime(),
+                                        value: value,
+                                        position: {
+                                            x: stickerItem.offsetLeft,
+                                            y: stickerItem.offsetTop
+                                        },
+                                        id: data.id,
+                                        html: html
+                                    }
+                                })
+                            }
                             window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 插入 value 为 ${value} 的文本`)
-                            setTimeout(() => {
-                                this.model.setStrokeState(true)
-                            })
                         }
-
-
-                        if (this.model.getRecordState()) {
-                            let stickers = this.model.getRecordData().stickers
-                            stickers.push({
-                                time: new Date().getTime() - this.model.getRecordStartTime(),
-                                type: data.type,
-                                html: data.html,
-                                position: {
-                                    x: stickerItem.offsetLeft,
-                                    y: stickerItem.offsetTop
-                                }
-                            })
-                            this.model.setRecordData('stickers', stickers)
-                        }
-
-
-
                     }
                 }
             })
@@ -232,13 +232,15 @@
                     window.eventHub.emit('updatedOperationLog', log)
 
                 }
-
                 this.model.setStrokeState(false)
                 // 记录当前笔画
                 if (this.model.getRecordState()){
-                    let tracks =  this.model.getRecordData().tracks
-                    tracks.push(this.model.getStroke())
-                    this.model.setRecordData('tracks', tracks)
+                    let stroke = this.model.getStroke()
+                    let newData = {
+                        type: 'stroke',
+                        data: stroke,
+                    }
+                    this.model.getRecordData().push(newData)
                     this.model.setStroke([])
                 }
             }
@@ -269,19 +271,19 @@
                 canvasWrapper.onclick = e => {}
 
                 if (this.model.getRecordState()) {
-                    let stickers = this.model.getRecordData().stickers
-                    stickers.push({
-                        time: new Date().getTime() - this.model.getRecordStartTime(),
-                        url: url,
-                        type: '',
-                        id: id,
-                        html: html,
-                        position: {
-                            x: stickerItem.offsetLeft,
-                            y: stickerItem.offsetTop
+                    this.model.getRecordData().push({
+                        type: 'sticker',
+                        data: {
+                            time: new Date().getTime() - this.model.getRecordStartTime(),
+                            url: url,
+                            position: {
+                                x: stickerItem.offsetLeft,
+                                y: stickerItem.offsetTop
+                            },
+                            id: id,
+                            html: html
                         }
                     })
-                    this.model.setRecordData('stickers', stickers)
                 }
 
                 window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 处放置 id 为 ${id} 的贴图`)
