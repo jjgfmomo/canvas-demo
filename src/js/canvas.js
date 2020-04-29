@@ -130,46 +130,73 @@
                 this.createStickerAndBindEvent(data.html, data.id, data.url)
             })
             window.eventHub.on('createText', data => {
-                document.querySelector('#insert-text').onclick = e => {
-                    this.model.setStrokeState(false)
-                    let canvasWrapper = document.querySelector('#canvas-wrapper')
-                    let stickerItem = document.createElement('div')
-                    let canvasWrapperRect = canvasWrapper.getClientRects()[0]
-                    canvasWrapper.onclick = e => {
-                        stickerItem.insertAdjacentHTML('beforeend', data.html)
-                        stickerItem.setAttribute('class', 'stickers-item')
-                        stickerItem.style.left =  e.x - canvasWrapperRect.x + 'px'
-                        stickerItem.style.top =  e.y - canvasWrapperRect.y + 'px'
-                        canvasWrapper.append(stickerItem)
-                        canvasWrapper.onclick = e => {}
+                this.model.setStrokeState(false)
+                let canvasWrapper = document.querySelector('#canvas-wrapper')
+                let stickerItem = document.createElement('div')
+                let canvasWrapperRect = canvasWrapper.getClientRects()[0]
+                canvasWrapper.onclick = e => {
+                    stickerItem.insertAdjacentHTML('beforeend', data.html)
+                    stickerItem.setAttribute('class', 'stickers-item')
+                    stickerItem.style.left =  e.x - canvasWrapperRect.x + 'px'
+                    stickerItem.style.top =  e.y - canvasWrapperRect.y + 'px'
+                    canvasWrapper.append(stickerItem)
+                    canvasWrapper.onclick = e => {}
 
-                        let textElement = stickerItem.firstChild
-                        let value= null
+                    let textElement = stickerItem.firstChild
+                    let value= null
 
-                        textElement.focus()
+                    textElement.focus()
 
-                        textElement.onblur = e => {
-                            value = textElement.value
-                            if (this.model.getRecordState()) {
-                                let html = data.html.replace('input', `input value = ${value}`)
-                                this.model.getRecordData().push({
-                                    type: 'text',
-                                    data: {
-                                        time: new Date().getTime() - this.model.getRecordStartTime(),
-                                        value: value,
-                                        position: {
-                                            x: stickerItem.offsetLeft,
-                                            y: stickerItem.offsetTop
-                                        },
-                                        id: data.id,
-                                        html: html
-                                    }
-                                })
-                            }
-                            window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 插入 value 为 ${value} 的文本`)
+                    textElement.onblur = e => {
+                        value = textElement.value
+                        if (this.model.getRecordState()) {
+                            let html = data.html.replace('input', `input value = ${value}`)
+                            this.model.getRecordData().push({
+                                type: 'text',
+                                data: {
+                                    time: new Date().getTime() - this.model.getRecordStartTime(),
+                                    value: value,
+                                    position: {
+                                        x: stickerItem.offsetLeft,
+                                        y: stickerItem.offsetTop
+                                    },
+                                    id: data.id,
+                                    html: html
+                                }
+                            })
                         }
+                        window.eventHub.emit('updatedOperationLog', `在 x: ${stickerItem.offsetLeft}, y: ${stickerItem.offsetTop} 插入 value 为 ${value} 的文本`)
                     }
                 }
+            })
+            // 撤销
+            window.eventHub.on('backout',() => {
+
+                const canvas = this.getCanvasElement()
+                this.canvasContext.clearRect(0, 0, canvas.width, canvas.height)
+
+                document.querySelectorAll('.stickers-item').forEach(element => {
+                    element.remove()
+                })
+
+                let recordData = this.model.getRecordData()
+                recordData.pop()
+                console.log(recordData)
+                recordData.map(res => {
+                    // 绘制 stroke 数据
+                    if (res.type === 'stroke') {
+                        let previousPosition = res.data[0] ? res.data[0].position : null
+                        res.data.map(stroke => {
+                            this.drawLine(previousPosition, stroke.position, stroke.color)
+                            previousPosition = stroke.position
+                        })
+                    }
+                    // 绘制 text ||  sticker 数据
+                    if (res.type === 'text' || res.type === 'sticker') {
+                        const data = res.data
+                        this.createSticker(data.html, data.id, data.position)
+                    }
+                })
             })
         },
         addListener() {

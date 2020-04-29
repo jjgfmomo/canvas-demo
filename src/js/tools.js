@@ -13,7 +13,7 @@
             <div class="tools-item color blue"></div>
             <div class="tools-item color red"></div>
             <div class="tools-item color yellow"></div>
-            <svg class="icon tools-item" aria-hidden="true">
+            <svg class="icon tools-item" id="backout" aria-hidden="true">
                 <use xlink:href="#icon-back"></use>
             </svg>
             <svg class="icon tools-item" id="insert-text" aria-hidden="true">
@@ -51,6 +51,7 @@
             this.bindOnclickByLists(this.model.data.pointerLists, 'pointer')
             this.bindOnclickByLists(this.model.data.colorLists, 'color')
             this.insertTextTest()
+            this.backout()
         },
         bindOnclickByLists(lists, type) {
             lists.map(item => {
@@ -62,10 +63,17 @@
             })
         },
         insertTextTest() {
-            window.eventHub.emit('createText', {
-                html: '<input type="text"  style="background-color: transparent;">',
-                type: 'text'
-            })
+            document.querySelector('#insert-text').onclick = e => {
+                window.eventHub.emit('createText', {
+                    html: '<input type="text"  style="background-color: transparent;">',
+                    type: 'text'
+                })
+            }
+        },
+        backout() {
+            document.querySelector('#backout').onclick = e => {
+                window.eventHub.emit('backout')
+            }
         }
     }
     controller.init(view,model)
