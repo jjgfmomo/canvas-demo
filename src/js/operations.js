@@ -35,6 +35,7 @@
                 window.eventHub.emit(event)
             }
         }
+
     }
     controller.init(view,model)
 }
